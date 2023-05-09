@@ -1,25 +1,21 @@
 package com.example.pizarrainteractivacourtcoach;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EdgeEffect;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import java.util.Arrays;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -157,31 +153,45 @@ public class MainActivity extends AppCompatActivity {
         tiempoCuarto = 600000; // Reiniciar el tiempo a 10 minutos
         actualizarTextoTimer(); //Llamamos al método que actualiza el TextView del marcador para que lo actualize
 
-        int periodo = Integer.parseInt(textView_periodo.getText().toString());
-        periodo++;
+        //Almacenamos el dato del TextView en un String
+        String periodoSTR = textView_periodo.getText().toString();
 
-        String periodoStr = String.valueOf(periodo);
-        textView_periodo.setText(periodoStr);
+        //Comprobamos si el String del TextView contiene la cadena "PR"
+        if (!periodoSTR.contains("PR ")){
+            int periodo = Integer.parseInt(periodoSTR); //Como no lo contiene, transformamos el String en un valor int
+            periodo++; //Incrementamos en uno el periodo
 
-        if (periodo <= 4){
-            periodo = Integer.parseInt(textView_periodo.getText().toString());
-            periodoStr = String.valueOf(periodo);
-            textView_periodo.setText(periodoStr);
+            String periodoStr = String.valueOf(periodo); //Transformamos el int en String para poder asignarselo al TextView
+            textView_periodo.setText(periodoStr); //Asignamos el String al TextView con el periodo actualizado
 
-        } else if (!hayProrroga()){
-            imageButton_Play.setEnabled(false);
-            imageButton_Stop.setEnabled(false);
-            Toast.makeText(this, "El partido ha terminado.", Toast.LENGTH_SHORT).show();
+            if (periodo <= 4){ //Comprobamos si el periodo es menor o igual a 4, los cuartos que tiene un partido de baloncesto
+                periodo = Integer.parseInt(textView_periodo.getText().toString()); //Transformamos el String en un valor int
+                periodoStr = String.valueOf(periodo); //Transformamos el int en un String para poder asignarlo al TextView
+                textView_periodo.setText(periodoStr); //Asignamos el String al TextView con el periodo actualizado
+            } else if (!hayProrroga()){ //Comprobamos si al finalizar los 4 periodos hay prórroga
+                imageButton_Play.setEnabled(false); //Desactivamos el botón de Play
+                imageButton_Stop.setEnabled(false); //Desactivamos el botón de Stop
+                Toast.makeText(this, "El partido ha terminado.", Toast.LENGTH_SHORT).show(); //Mostramos un mensaje emergente de que el partido a terminado
+            } else if (hayProrroga()) { //Comprobamos si hay prórroga
+                periodoStr = "PR " + (periodo - (periodo - 1)); //Al haber prórroga, cambiamos el formato del TextView para indiar que el periodo pertenece a la prórroga
+                textView_periodo.setText(periodoStr); //Asignamos el nuevo String con el formato de la prórroga al TextView
+            }
+        //Comprobamos si el String del TextView contiene la cadena "PR"
+        } else if (periodoSTR.contains("PR")) {
+            //Comprobamos si hay prórroga después de finalizar el periodo anterior
+            if(hayProrroga()){
+                //Dividimos el String que obtenemos del TextView en dos partes, tomando como divisor un espacio, ya que el formato de un periodo de la prórroga es: "PR 0"
+                String[] periodoPartes = textView_periodo.getText().toString().split(" ");
 
-        } else if (hayProrroga()) {
-            periodoStr = "PR " + (periodo - (periodo - 1));
-            textView_periodo.setText(periodoStr);
-            periodo++;
+                //Asignamos el número del periodo de la prórroga a un int, tomando como valor la segunda parte del String
+                int periodoNumero = Integer.parseInt(periodoPartes[1]);
 
-        }
-
-        if (periodoStr.contains("PR ")){
-            String[] periodoPartes =
+                String periodoStr = "PR " + (periodoNumero + 1); //Creamos un String aplicando el formato de la prórroga, sumando un periodo más
+                textView_periodo.setText(periodoStr); //Asignamos el String al TextView
+            } else{
+                //Mostramos un mensaje emergente de que el partido ha terminado
+                Toast.makeText(this, "El partido ha terminado", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 

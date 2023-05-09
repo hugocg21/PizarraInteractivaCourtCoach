@@ -13,11 +13,6 @@
         android:theme="@style/Theme.PizarraInteractivaCourtCoach"
         tools:targetApi="31">
         <activity
-            android:name=".pruebaBalon"
-            android:exported="true" >
-
-        </activity>
-        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:screenOrientation="landscape">
