@@ -155,8 +155,8 @@
 
     <ImageView
         android:id="@+id/imageViewTripleMetido"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="452dp"
         android:layout_marginTop="32dp"
         android:src="@drawable/triple_metido"
@@ -165,8 +165,8 @@
 
     <ImageView
         android:id="@+id/imageViewDosMetido"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:src="@drawable/dos_metido"
@@ -175,8 +175,8 @@
 
     <ImageView
         android:id="@+id/imageViewUnoMetido"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:src="@drawable/uno_metido"
@@ -185,8 +185,8 @@
 
     <ImageView
         android:id="@+id/imageViewTresFallado"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="452dp"
         android:layout_marginTop="32dp"
         android:src="@drawable/tres_fallado"
@@ -195,8 +195,8 @@
 
     <ImageView
         android:id="@+id/imageViewDosFallado"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:src="@drawable/dos_fallado"
@@ -205,8 +205,8 @@
 
     <ImageView
         android:id="@+id/imageViewUnoFallado"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:src="@drawable/uno_fallado"
@@ -215,113 +215,83 @@
 
     <ImageView
         android:id="@+id/imageViewReboteOfensivo"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="452dp"
         android:layout_marginTop="32dp"
-        android:src="@drawable/balon"
+        android:src="@drawable/rebote_defensivo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewTresFallado" />
 
     <ImageView
         android:id="@+id/imageViewReboteDefensivo"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:src="@drawable/balon"
+        android:src="@drawable/rebote_ofensivo"
         app:layout_constraintStart_toEndOf="@+id/imageViewReboteOfensivo"
         app:layout_constraintTop_toBottomOf="@+id/imageViewDosFallado" />
 
     <ImageView
         android:id="@+id/imageViewAsistencia"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:src="@drawable/balon"
+        android:src="@drawable/asistencia"
         app:layout_constraintStart_toEndOf="@+id/imageViewReboteDefensivo"
         app:layout_constraintTop_toBottomOf="@+id/imageViewUnoFallado" />
 
     <ImageView
         android:id="@+id/imageViewRobo"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="452dp"
         android:layout_marginTop="32dp"
-        android:src="@drawable/balon"
+        android:src="@drawable/robo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewReboteOfensivo" />
 
     <ImageView
         android:id="@+id/imageViewTapon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:src="@drawable/balon"
+        android:src="@drawable/tapon"
         app:layout_constraintStart_toEndOf="@+id/imageViewRobo"
         app:layout_constraintTop_toBottomOf="@+id/imageViewReboteDefensivo" />
 
     <ImageView
         android:id="@+id/imageViewPerdida"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:src="@drawable/balon"
+        android:src="@drawable/perdida"
         app:layout_constraintStart_toEndOf="@+id/imageViewTapon"
         app:layout_constraintTop_toBottomOf="@+id/imageViewAsistencia" />
 
     <ImageView
         android:id="@+id/imageViewFaltaRecibida"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="452dp"
         android:layout_marginTop="32dp"
-        android:src="@drawable/balon"
+        android:src="@drawable/falta_recibida"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewRobo" />
 
     <ImageView
         android:id="@+id/imageViewFaltaCometida"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
-        android:src="@drawable/balon"
+        android:src="@drawable/falta_cometida"
         app:layout_constraintStart_toEndOf="@+id/imageViewFaltaRecibida"
         app:layout_constraintTop_toBottomOf="@+id/imageViewTapon" />
-
-    <ImageView
-        android:id="@+id/imageViewAntideportiva"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:src="@drawable/balon"
-        app:layout_constraintStart_toEndOf="@+id/imageViewFaltaCometida"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewPerdida" />
-
-    <ImageView
-        android:id="@+id/imageViewTecnica"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="452dp"
-        android:layout_marginTop="32dp"
-        android:src="@drawable/balon"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewFaltaRecibida" />
-
-    <ImageView
-        android:id="@+id/imageViewFaltaDescalificante"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:src="@drawable/balon"
-        app:layout_constraintStart_toEndOf="@+id/imageViewTecnica"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewFaltaCometida" />
 
     <TextView
         android:id="@+id/textViewBanquillo"
