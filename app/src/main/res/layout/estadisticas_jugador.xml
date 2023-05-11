@@ -34,19 +34,204 @@
             android:text="Puntos: "
             android:textSize="16sp" />
 
+        <TextView
+            android:id="@+id/textViewPuntosAnotadosDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/textViewRebotesDialog"
+            android:id="@+id/textViewTirosLibresDialog"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginTop="8dp"
-            android:text="Rebotes: "
+            android:layout_marginTop="16dp"
+            android:text="Tiros libres: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewLibresAnotadosDialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="/"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewLibresTotalesDialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewTirosDosDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:text="Tiros de dos: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewDosAnotadosDialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="/"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewDosTotalesDialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewTriplesDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:text="Triples: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewTriplesAnotadosDialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="/"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewTriplesTotalesDialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewRebotesDefensivosDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:text="Rebotes defensivos: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewRebotesDefensivosCogidosDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewRebotesOfensivosDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:text="Rebotes ofensivos: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewRebotesOfensivosCogidosDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
             android:textSize="16sp" />
 
     </LinearLayout>
@@ -56,12 +241,208 @@
         android:layout_height="wrap_content" >
 
         <TextView
+            android:id="@+id/textViewRebotesTotalesDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:text="Rebotes totales: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewRebotesTotalesCogidosDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
             android:id="@+id/textViewAsistenciasDialog"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:text="Asistencias: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewAsistenciasDadasDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewRobosDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:text="Robos: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewRobosRealizadosDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewTaponesDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:text="Tapones: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewTaponesRealizadosDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/textViewPerdidasDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="16dp"
+            android:text="Pérdidas: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewPerdidasAnotadasDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/textViewFaltasRecibidasDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:text="Faltas recibidas: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewFaltasRecibidasAnotadasDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/textViewFaltasCometidasDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:text="Faltas cometidas: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewFaltasCometidasAnotadasDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/textViewValoracionDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"
+            android:text="Valoración: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewValoracionConseguidaDialog"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="textEnd"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="10dp"
+            android:text="0"
             android:textSize="16sp" />
 
     </LinearLayout>

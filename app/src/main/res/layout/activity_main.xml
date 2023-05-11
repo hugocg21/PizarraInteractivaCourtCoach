@@ -154,23 +154,25 @@
         app:layout_constraintTop_toBottomOf="@+id/textViewMarcador" />
 
     <ImageView
-        android:id="@+id/imageViewTripleMetido"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="452dp"
-        android:layout_marginTop="32dp"
-        android:src="@drawable/triple_metido"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewEstadisticas" />
-
-    <ImageView
         android:id="@+id/imageViewDosMetido"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/dos_metido"
         app:layout_constraintStart_toEndOf="@+id/imageViewTripleMetido"
+        app:layout_constraintTop_toBottomOf="@+id/textViewEstadisticas" />
+
+    <ImageView
+        android:id="@+id/imageViewTripleMetido"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="452dp"
+        android:layout_marginTop="32dp"
+        android:elevation="10dp"
+        android:src="@drawable/triple_metido"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewEstadisticas" />
 
     <ImageView
@@ -179,6 +181,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/uno_metido"
         app:layout_constraintStart_toEndOf="@+id/imageViewDosMetido"
         app:layout_constraintTop_toBottomOf="@+id/textViewEstadisticas" />
@@ -189,6 +192,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="452dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/tres_fallado"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewTripleMetido" />
@@ -199,6 +203,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/dos_fallado"
         app:layout_constraintStart_toEndOf="@+id/imageViewTresFallado"
         app:layout_constraintTop_toBottomOf="@+id/imageViewDosMetido" />
@@ -209,6 +214,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/uno_fallado"
         app:layout_constraintStart_toEndOf="@+id/imageViewDosFallado"
         app:layout_constraintTop_toBottomOf="@+id/imageViewUnoMetido" />
@@ -219,6 +225,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="452dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/rebote_defensivo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewTresFallado" />
@@ -229,6 +236,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/rebote_ofensivo"
         app:layout_constraintStart_toEndOf="@+id/imageViewReboteOfensivo"
         app:layout_constraintTop_toBottomOf="@+id/imageViewDosFallado" />
@@ -239,6 +247,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/asistencia"
         app:layout_constraintStart_toEndOf="@+id/imageViewReboteDefensivo"
         app:layout_constraintTop_toBottomOf="@+id/imageViewUnoFallado" />
@@ -249,6 +258,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="452dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/robo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewReboteOfensivo" />
@@ -259,6 +269,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/tapon"
         app:layout_constraintStart_toEndOf="@+id/imageViewRobo"
         app:layout_constraintTop_toBottomOf="@+id/imageViewReboteDefensivo" />
@@ -269,6 +280,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/perdida"
         app:layout_constraintStart_toEndOf="@+id/imageViewTapon"
         app:layout_constraintTop_toBottomOf="@+id/imageViewAsistencia" />
@@ -279,6 +291,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="452dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/falta_recibida"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewRobo" />
@@ -289,6 +302,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:elevation="10dp"
         android:src="@drawable/falta_cometida"
         app:layout_constraintStart_toEndOf="@+id/imageViewFaltaRecibida"
         app:layout_constraintTop_toBottomOf="@+id/imageViewTapon" />
