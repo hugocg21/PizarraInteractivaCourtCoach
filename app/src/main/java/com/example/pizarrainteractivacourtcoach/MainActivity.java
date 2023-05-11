@@ -22,19 +22,16 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.util.HashMap;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
+public class MainActivity extends AppCompatActivity{
     private ImageButton imageButton_Play, imageButton_Stop; //Botontes de Play y Stop del marcador
     private TextView textView_tiempo, textView_puntosLocal, textView_puntosVisitante, textView_periodo, textView_faltasLocal, textView_faltasVisitante; //Atributos del marcador
-    private TextView textView_puntosJugadorCardView, textView_rebotesJugadorCardView, textView_asistenciasJugadorCardView; //Estadisticas en el CardView
+    private TextView textView_puntosJugadorCardView, textView_rebotesJugadorCardView, textView_asistenciasJugadorCardView, textView_faltasJugadorCardView; //Estadisticas en el CardView
     private CountDownTimer timer; //Timer para el timepo de cuarto
     private boolean tiempoCorriendo = false; //Define si el tiempo esta en corriendo o parado
     private long tiempoCuarto = 600000; //10 minutos en milisegundos
-    private CardView cardView_base, cardView_escolta, cardView_alero, cardView_alapivot, cardView_pivot; //Los diferentes CardViews de todos los jugadores en pista
-    private ImageView imageView_triple_anotado, imageView_triple_fallado, imageView_dos_anotado, imageView_dos_fallado, imageView_libre_anotado, imageView_libre_fallado,
-            imageView_rebote_defensivo, imageView_rebote_ofensivo, imageView_asistencia, imageView_robo, imageView_tapon, imageView_perdida, imageView_falta_recibida,
-            imageView_falta_cometida; //Todos los ImageView de las estadísticas
-    private int currentPoints;
-    private int originalX, originalY;
+    private ImageView[] imageViews;
+    private CardView[] cardViews;
+    private HashMap<String, int[]> playerStatsMap = new HashMap<>();
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -54,49 +51,49 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         textView_puntosJugadorCardView = findViewById(R.id.textViewPuntosJugador);
         textView_rebotesJugadorCardView = findViewById(R.id.textViewRebotesJugador);
         textView_asistenciasJugadorCardView = findViewById(R.id.textViewAsistenciasJugador);
+        textView_faltasJugadorCardView = findViewById(R.id.textViewFaltasJugador);
 
         //Botones de control de tiempo del marcador
         imageButton_Play = findViewById(R.id.imageButtonPlay);
         imageButton_Stop = findViewById(R.id.imageButtonStop);
 
-        //Todos los CardView de los jugadores
-        cardView_base = findViewById(R.id.cardViewBase);
-        cardView_escolta = findViewById(R.id.cardViewEscolta);
-        cardView_alero = findViewById(R.id.cardViewAlero);
-        cardView_alapivot = findViewById(R.id.cardViewAlaPivot);
-        cardView_pivot = findViewById(R.id.cardViewPivot);
+        //Array de ImageViews para asignar cada ImageView a cada estadística posible
+        imageViews = new ImageView[14];
+        imageViews[0] = findViewById(R.id.imageViewTripleMetido);
+        imageViews[1] = findViewById(R.id.imageViewTresFallado);
+        imageViews[2] = findViewById(R.id.imageViewDosMetido);
+        imageViews[3] = findViewById(R.id.imageViewDosFallado);
+        imageViews[4] = findViewById(R.id.imageViewUnoMetido);
+        imageViews[5] = findViewById(R.id.imageViewUnoFallado);
+        imageViews[6] = findViewById(R.id.imageViewReboteDefensivo);
+        imageViews[7] = findViewById(R.id.imageViewReboteOfensivo);
+        imageViews[8] = findViewById(R.id.imageViewAsistencia);
+        imageViews[9] = findViewById(R.id.imageViewRobo);
+        imageViews[10] = findViewById(R.id.imageViewTapon);
+        imageViews[11] = findViewById(R.id.imageViewPerdida);
+        imageViews[12] = findViewById(R.id.imageViewFaltaRecibida);
+        imageViews[13] = findViewById(R.id.imageViewFaltaCometida);
 
-        //ImageViews de las estadísticas
-        imageView_triple_anotado = findViewById(R.id.imageViewTripleMetido);
-        imageView_triple_fallado = findViewById(R.id.imageViewTresFallado);
-        imageView_dos_anotado = findViewById(R.id.imageViewDosMetido);
-        imageView_dos_fallado = findViewById(R.id.imageViewDosFallado);
-        imageView_libre_anotado = findViewById(R.id.imageViewUnoMetido);
-        imageView_libre_fallado = findViewById(R.id.imageViewUnoFallado);
-        imageView_rebote_defensivo = findViewById(R.id.imageViewReboteDefensivo);
-        imageView_rebote_ofensivo = findViewById(R.id.imageViewReboteOfensivo);
-        imageView_asistencia = findViewById(R.id.imageViewAsistencia);
-        imageView_robo = findViewById(R.id.imageViewRobo);
-        imageView_tapon = findViewById(R.id.imageViewTapon);
-        imageView_perdida = findViewById(R.id.imageViewPerdida);
-        imageView_falta_recibida = findViewById(R.id.imageViewFaltaRecibida);
-        imageView_falta_cometida = findViewById(R.id.imageViewFaltaCometida);
+        //Array de CardViews para asignar cada CardView a cada jugador
+        cardViews = new CardView[12];
+        cardViews[0] = findViewById(R.id.cardViewBase);
+        cardViews[1] = findViewById(R.id.cardViewEscolta);
+        cardViews[2] = findViewById(R.id.cardViewAlero);
+        cardViews[3] = findViewById(R.id.cardViewAlaPivot);
+        cardViews[4] = findViewById(R.id.cardViewPivot);
+        cardViews[5] = findViewById(R.id.cardViewPivot);
+        cardViews[6] = findViewById(R.id.cardViewPivot);
+        cardViews[7] = findViewById(R.id.cardViewPivot);
+        cardViews[8] = findViewById(R.id.cardViewPivot);
+        cardViews[9] = findViewById(R.id.cardViewPivot);
+        cardViews[10] = findViewById(R.id.cardViewPivot);
+        cardViews[11] = findViewById(R.id.cardViewPivot);
 
-        //Asignamos el movimiento a todos los ImageView
-        imageView_triple_anotado.setOnTouchListener(this);
-        imageView_triple_fallado.setOnTouchListener(this);
-        imageView_dos_anotado.setOnTouchListener(this);
-        imageView_dos_fallado.setOnTouchListener(this);
-        imageView_libre_anotado.setOnTouchListener(this);
-        imageView_libre_fallado.setOnTouchListener(this);
-        imageView_rebote_defensivo.setOnTouchListener(this);
-        imageView_rebote_ofensivo.setOnTouchListener(this);
-        imageView_asistencia.setOnTouchListener(this);
-        imageView_robo.setOnTouchListener(this);
-        imageView_tapon.setOnTouchListener(this);
-        imageView_perdida.setOnTouchListener(this);
-        imageView_falta_recibida.setOnTouchListener(this);
-        imageView_falta_cometida.setOnTouchListener(this);
+        //Método para asignar nombres a modo de Tags a cada ImageView y CardView
+        darTags();
+
+        //Método para inicializar todas las estadísticas de cada jugador a 0 al inicio de cada partido
+        inicializarStats();
 
         //Método que controla el flujo del tiempo del marcador
         actualizarTextoTimer();
@@ -121,40 +118,211 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         });
 
         //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardView_base.setOnClickListener(new View.OnClickListener() {
+        cardViews[0].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarDialogo();
+                mostrarDialogo("point_guard");
             }
         });
 
-        cardView_escolta.setOnClickListener(new View.OnClickListener() {
+        //Método que muesta el Dialog con las estadísticas del Escolta en pista
+        cardViews[1].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarDialogo();
+                mostrarDialogo("shooting_guard");
             }
         });
 
-        cardView_alero.setOnClickListener(new View.OnClickListener() {
+        //Método que muesta el Dialog con las estadísticas del Alero en pista
+        cardViews[2].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarDialogo();
+                mostrarDialogo("small_forward");
             }
         });
 
-        cardView_alapivot.setOnClickListener(new View.OnClickListener() {
+        //Método que muesta el Dialog con las estadísticas del Alapivot en pista
+        cardViews[3].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarDialogo();
+                mostrarDialogo("power_forward");
             }
         });
 
-        cardView_pivot.setOnClickListener(new View.OnClickListener() {
+        //Método que muesta el Dialog con las estadísticas del Pivot en pista
+        cardViews[4].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarDialogo();
+                mostrarDialogo("center");
             }
         });
+
+        //Método que muesta el Dialog con las estadísticas del suplente 1 en pista
+        cardViews[5].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarDialogo("suplente1");
+            }
+        });
+
+        //Método que muesta el Dialog con las estadísticas del suplente 2 en pista
+        cardViews[6].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarDialogo("suplente2");
+            }
+        });
+
+        //Método que muesta el Dialog con las estadísticas del suplente 3 en pista
+        cardViews[7].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarDialogo("suplente3");
+            }
+        });
+
+        //Método que muesta el Dialog con las estadísticas del suplente 4 en pista
+        cardViews[8].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarDialogo("suplente4");
+            }
+        });
+
+        //Método que muesta el Dialog con las estadísticas del suplente 5 en pista
+        cardViews[9].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarDialogo("suplente5");
+            }
+        });
+
+        //Método que muesta el Dialog con las estadísticas del suplente 6 en pista
+        cardViews[10].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarDialogo("suplente6");
+            }
+        });
+
+        //Método que muesta el Dialog con las estadísticas del suplente 7 en pista
+        cardViews[11].setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarDialogo("suplente7");
+            }
+        });
+
+        //Asignamos el movimiento de los ImageViews con un bucle for
+        for (ImageView imageView : imageViews) {
+            imageView.setOnTouchListener(new MyOnTouchListener());
+        }
+    }
+
+    //Método para dar Tags a cada CardView
+    private void darTags() {
+        cardViews[0].setTag("base");
+        cardViews[1].setTag("escolta");
+        cardViews[2].setTag("alero");
+        cardViews[3].setTag("ala_pivot");
+        cardViews[4].setTag("pivot");
+        cardViews[5].setTag("suplente1");
+        cardViews[6].setTag("suplente2");
+        cardViews[7].setTag("suplente3");
+        cardViews[8].setTag("suplente4");
+        cardViews[9].setTag("suplente5");
+        cardViews[10].setTag("suplente6");
+        cardViews[11].setTag("suplente7");
+
+        imageViews[0].setTag("tripleAnotado");
+        imageViews[1].setTag("tripleFallado");
+        imageViews[2].setTag("dosAnotado");
+        imageViews[3].setTag("dosFallado");
+        imageViews[4].setTag("libreAnotado");
+        imageViews[5].setTag("libreFallado");
+        imageViews[6].setTag("reboteDefensivo");
+        imageViews[7].setTag("reboteOfensivo");
+        imageViews[8].setTag("asistencia");
+        imageViews[9].setTag("robo");
+        imageViews[10].setTag("tapon");
+        imageViews[11].setTag("perdida");
+        imageViews[12].setTag("faltaRecibida");
+        imageViews[13].setTag("faltaCometida");
+    }
+
+    //Método para inicializar todas las stats de todos los jugadores a 0
+    private void inicializarStats() {
+        //Define a 0 las stats del base
+        int[] player1Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al base al Map de jugadores
+        playerStatsMap.put("base", player1Stats);
+
+        //Define a 0 las stats del escolta
+        int[] player2Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al escolta al Map de jugadores
+        playerStatsMap.put("escolta", player2Stats);
+
+        //Define a 0 las stats del alero
+        int[] player3Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al alero al Map de jugadores
+        playerStatsMap.put("alero", player3Stats);
+
+        //Define a 0 las stats del ala_pivot
+        int[] player4Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al ala_pivot al Map de jugadores
+        playerStatsMap.put("ala_pivot", player4Stats);
+
+        //Define a 0 las stats del pivot
+        int[] player5Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al pivot al Map de jugadores
+        playerStatsMap.put("pivot", player5Stats);
+
+        //Define a 0 las stats del suplente 1
+        int[] player6Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al suplente 1 al Map de jugadores
+        playerStatsMap.put("suplente1", player6Stats);
+
+        //Define a 0 las stats del suplente 2
+        int[] player7Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al suplente 2 al Map de jugadores
+        playerStatsMap.put("suplente2", player7Stats);
+
+        //Define a 0 las stats del suplente 3
+        int[] player8Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al suplente 3 al Map de jugadores
+        playerStatsMap.put("suplente3", player8Stats);
+
+        //Define a 0 las stats del suplente 4
+        int[] player9Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al suplente 4 al Map de jugadores
+        playerStatsMap.put("suplente4", player9Stats);
+
+        //Define a 0 las stats del suplente 5
+        int[] player10Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al suplente 5 al Map de jugadores
+        playerStatsMap.put("suplente5", player10Stats);
+
+        //Define a 0 las stats del suplente 6
+        int[] player11Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al suplente 6 al Map de jugadores
+        playerStatsMap.put("suplente6", player11Stats);
+
+        //Define a 0 las stats del suplente 7
+        int[] player12Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        //Añade al suplente 7 al Map de jugadores
+        playerStatsMap.put("suplente7", player12Stats);
     }
 
     //Método que controla el comienzo del timer
@@ -250,456 +418,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     }
 
     //Método que muesta el Dialog con las estadísticas del jugador en cuestión
-    private void mostrarDialogo() {
-        //Creamos un objeto MaterialAlertDialogBuilder, que crea un Dialog en forma de CardView
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
-
-        //Creamos el inflater para convertir el XML con el Dialog personalizado en una vista para el Activity Main
-        LayoutInflater inflater = LayoutInflater.from(getApplicationContext());
-        View dialogView = inflater.inflate(R.layout.estadisticas_jugador, null);
-
-        //Asignamos nuestro Dialog personalizado para que se muestre este y no el predeterminado de Android Studio
-        builder.setView(dialogView);
-
-        //Método que crea un botón de control de la ventana del Dialog, que lo llamamos "Cerrar", que sirve para cerrar el CardView
-        //Este botón sirve para mostrar todas las estadísticas del jugador seleccionado, no se puede editar nada
-        builder.setPositiveButton("Cerrar", new DialogInterface.OnClickListener() {
-
-            //Método OnClick del botón
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        //Método que crea la ventana emergente del Dialog
-        AlertDialog dialog = builder.create();
-
-        //Método que muestra el Dialog por pantalla
-        dialog.show();
-    }
-
-    private boolean hayProrroga() {
-        int puntosLocal = Integer.parseInt(textView_puntosLocal.getText().toString());
-        int puntosVisitante = Integer.parseInt(textView_puntosVisitante.getText().toString());
-
-        if (puntosLocal == puntosVisitante) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private class MyOnTouchListener implements View.OnTouchListener {
-
-        private int initialX, initialY;
-        private float initialTouchX, initialTouchY;
-
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                initialX = view.getLeft();
-                initialY = view.getTop();
-                initialTouchX = motionEvent.getRawX();
-                initialTouchY = motionEvent.getRawY();
-                return true;
-            } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-                int dx = (int) (motionEvent.getRawX() - initialTouchX);
-                int dy = (int) (motionEvent.getRawY() - initialTouchY);
-                view.layout(initialX + dx, initialY + dy,
-                        initialX + dx + view.getWidth(),
-                        initialY + dy + view.getHeight());
-                return true;
-            } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                boolean droppedOnCardView = false;
-                for (int i = 0; i < 5; i++) {
-                    CardView cardView = cardViews[i];
-                    if (isViewOverlapping(view, cardView)) {
-                        droppedOnCardView = true;
-                        String player = (String) cardView.getTag();
-                        // Update player stats for the dropped ImageView
-                        updatePlayerStats(player, view);
-                        break;
-                    }
-                }
-                if (!droppedOnCardView) {
-                    view.layout(initialX, initialY,
-                            initialX + view.getWidth(),
-                            initialY + view.getHeight());
-                }
-                return true;
-            }
-            return false;
-        }
-
-        private void updatePlayerStats(CardView cardView, ImageView imageView) {
-            // Get the tag of the card view to determine which player it represents
-            String tag = (String) cardView.getTag();
-            // Get the tag of the image view to determine which stat it represents
-            String statTag = (String) imageView.getTag();
-
-            // Get the current stats of the player
-            int[] playerStats = playerStatsMap.get(tag);
-
-            // Update the appropriate stat based on the image view that was dropped
-            switch (statTag) {
-                case "threePointerMade":
-                    playerStats[0]++;
-                    break;
-                case "threePointerMissed":
-                    playerStats[1]++;
-                    break;
-                case "twoPointerMade":
-                    playerStats[2]++;
-                    break;
-                case "twoPointerMissed":
-                    playerStats[3]++;
-                    break;
-                case "freeThrowMade":
-                    playerStats[4]++;
-                    break;
-                case "freeThrowMissed":
-                    playerStats[5]++;
-                    break;
-                case "defensiveRebound":
-                    playerStats[6]++;
-                    break;
-                case "offensiveRebound":
-                    playerStats[7]++;
-                    break;
-                case "assist":
-                    playerStats[8]++;
-                    break;
-                case "steal":
-                    playerStats[9]++;
-                    break;
-                case "block":
-                    playerStats[10]++;
-                    break;
-                case "turnover":
-                    playerStats[11]++;
-                    break;
-                case "foulReceived":
-                    playerStats[12]++;
-                    break;
-                case "foulMade":
-                    playerStats[13]++;
-                    break;
-                default:
-                    // Do nothing if the image view doesn't represent a valid stat
-                    return;
-            }
-
-            // Update the text views in the card view with the new stats
-            TextView threePointerMadeTextView = cardView.findViewById(R.id.three_pointer_made_text_view);
-            threePointerMadeTextView.setText(String.valueOf(playerStats[0]));
-
-            TextView threePointerMissedTextView = cardView.findViewById(R.id.three_pointer_missed_text_view);
-            threePointerMissedTextView.setText(String.valueOf(playerStats[1]));
-
-            TextView twoPointerMadeTextView = cardView.findViewById(R.id.two_pointer_made_text_view);
-            twoPointerMadeTextView.setText(String.valueOf(playerStats[2]));
-
-            TextView twoPointerMissedTextView = cardView.findViewById(R.id.two_pointer_missed_text_view);
-            twoPointerMissedTextView.setText(String.valueOf(playerStats[3]));
-
-            TextView freeThrowMadeTextView = cardView.findViewById(R.id.free_throw_made_text_view);
-            freeThrowMadeTextView.setText(String.valueOf(playerStats[4]));
-
-            TextView freeThrowMissedTextView = cardView.findViewById(R.id.free_throw_missed_text_view);
-            freeThrowMissedTextView.setText(String.valueOf(playerStats[5]));
-
-            TextView defensiveReboundTextView = cardView.findViewById(R.id.defensive_rebound_text_view);
-            defensiveReboundTextView.setText(String.valueOf(playerStats[6]));
-
-            TextView offensiveReboundTextView = cardView.findViewById(R.id.offensive_rebound_text_view);
-            offensiveReboundTextView.setText(String.valueOf(playerStats[7]));
-
-            TextView assistTextView = cardView.findViewById(R.id.assist_text_view);
-            assistTextView.setText(String.valueOf(playerStats[8]));
-
-            TextView stealTextView = cardView.findViewById(R.id.steal_text_view);
-            stealTextView.setText(String.valueOf(playerStats[9]));
-
-            TextView blockTextView = cardView.findViewById(R.id.block_text_view);
-            blockTextView.setText(String.valueOf(playerStats[10]));
-
-            TextView turnoverTextView = cardView.findViewById(R.id.turnover_text_view);
-            turnoverTextView.setText(String.valueOf(playerStats[11]));
-
-            TextView foulReceivedTextView = cardView.findViewById(R.id.foul_received_text_view);
-            foulReceivedTextView.setText(String.valueOf(playerStats[12]));
-
-            TextView foulMadeTextView = cardView.findViewById(R.id.foul_made_text_view);
-            foulMadeTextView.setText(String.valueOf(playerStats[13]));
-
-            // Update the player stats map with the new stats
-            playerStatsMap.put(tag, playerStats);
-        }
-
-        private boolean isViewOverlapping(View view1, View view2) {
-            int[] view1Location = new int[2];
-            int[] view2Location = new int[2];
-            view1.getLocationOnScreen(view1Location);
-            view2.getLocationOnScreen(view2Location);
-            Rect rect1 = new Rect(view1Location[0], view1Location[1],
-                    view1Location[0] + view1.getWidth(), view1Location[1] + view1.getHeight());
-            Rect rect2 = new Rect(view2Location[0], view2Location[1],
-                    view2Location[0] + view2.getWidth(), view2Location[1] + view2.getHeight());
-            return rect1.intersect(rect2);
-        }
-    }
-}
-
-/*
-public class MainActivity extends AppCompatActivity {
-    private ImageView[] imageViews;
-    private CardView[] cardViews;
-    private HashMap<String, int[]> playerStatsMap = new HashMap<>();
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        imageViews = new ImageView[14];
-        imageViews[0] = findViewById(R.id.imageViewTripleMetido);
-        imageViews[1] = findViewById(R.id.imageViewTresFallado);
-        imageViews[2] = findViewById(R.id.imageViewDosMetido);
-        imageViews[3] = findViewById(R.id.imageViewDosFallado);
-        imageViews[4] = findViewById(R.id.imageViewUnoMetido);
-        imageViews[5] = findViewById(R.id.imageViewUnoFallado);
-        imageViews[6] = findViewById(R.id.imageViewReboteDefensivo);
-        imageViews[7] = findViewById(R.id.imageViewReboteOfensivo);
-        imageViews[8] = findViewById(R.id.imageViewAsistencia);
-        imageViews[9] = findViewById(R.id.imageViewRobo);
-        imageViews[10] = findViewById(R.id.imageViewTapon);
-        imageViews[11] = findViewById(R.id.imageViewPerdida);
-        imageViews[12] = findViewById(R.id.imageViewFaltaRecibida);
-        imageViews[13] = findViewById(R.id.imageViewFaltaCometida);
-
-        cardViews = new CardView[12];
-        cardViews[0] = findViewById(R.id.cardViewBase);
-        cardViews[1] = findViewById(R.id.cardViewEscolta);
-        cardViews[2] = findViewById(R.id.cardViewAlero);
-        cardViews[3] = findViewById(R.id.cardViewAlaPivot);
-        cardViews[4] = findViewById(R.id.cardViewPivot);
-        cardViews[5] = findViewById(R.id.cardViewPivot);
-        cardViews[6] = findViewById(R.id.cardViewPivot);
-        cardViews[7] = findViewById(R.id.cardViewPivot);
-        cardViews[8] = findViewById(R.id.cardViewPivot);
-        cardViews[9] = findViewById(R.id.cardViewPivot);
-        cardViews[10] = findViewById(R.id.cardViewPivot);
-        cardViews[11] = findViewById(R.id.cardViewPivot);
-
-        darTags();
-        inicializarStats();
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[0].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("point_guard");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[1].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("shooting_guard");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[2].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("small_forward");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[3].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("power_forward");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[4].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("center");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[5].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente1");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[6].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente2");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[7].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente3");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[8].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente4");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[9].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente5");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[10].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente6");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[11].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente7");
-            }
-        });
-
-        for (ImageView imageView : imageViews) {
-            imageView.setOnTouchListener(new MyOnTouchListener());
-        }
-    }
-
-    private void darTags() {
-        cardViews[0].setTag("point_guard");
-        cardViews[1].setTag("shooting_guard");
-        cardViews[2].setTag("small_forward");
-        cardViews[3].setTag("power_forward");
-        cardViews[4].setTag("center");
-        cardViews[5].setTag("suplente1");
-        cardViews[6].setTag("suplente2");
-        cardViews[7].setTag("suplente3");
-        cardViews[8].setTag("suplente4");
-        cardViews[9].setTag("suplente5");
-        cardViews[10].setTag("suplente6");
-        cardViews[11].setTag("suplente7");
-
-        imageViews[0].setTag("threePointerMade");
-        imageViews[1].setTag("threePointerMissed");
-        imageViews[2].setTag("twoPointerMade");
-        imageViews[3].setTag("twoPointerMissed");
-        imageViews[4].setTag("freeThrowMade");
-        imageViews[5].setTag("freeThrowMissed");
-        imageViews[6].setTag("defensiveRebound");
-        imageViews[7].setTag("offensiveRebound");
-        imageViews[8].setTag("assist");
-        imageViews[9].setTag("steal");
-        imageViews[10].setTag("block");
-        imageViews[11].setTag("turnover");
-        imageViews[12].setTag("foulReceived");
-        imageViews[13].setTag("foulMade");
-    }
-
-    private void inicializarStats() {
-        // Define initial stats for player 1
-        int[] player1Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 1 stats to the map
-        playerStatsMap.put("point_guard", player1Stats);
-
-        // Define initial stats for player 2
-        int[] player2Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 2 stats to the map
-        playerStatsMap.put("shooting_guard", player2Stats);
-
-        // Define initial stats for player 3
-        int[] player3Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 3 stats to the map
-        playerStatsMap.put("small_forward", player3Stats);
-
-        // Define initial stats for player 4
-        int[] player4Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 4 stats to the map
-        playerStatsMap.put("power_forward", player4Stats);
-
-        // Define initial stats for player 5
-        int[] player5Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 5 stats to the map
-        playerStatsMap.put("center", player5Stats);
-
-        // Define initial stats for player 6
-        int[] player6Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 6 stats to the map
-        playerStatsMap.put("suplente1", player6Stats);
-
-        // Define initial stats for player 7
-        int[] player7Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 7 stats to the map
-        playerStatsMap.put("suplente2", player7Stats);
-
-        // Define initial stats for player 8
-        int[] player8Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 8 stats to the map
-        playerStatsMap.put("suplente3", player8Stats);
-
-        // Define initial stats for player 9
-        int[] player9Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 9 stats to the map
-        playerStatsMap.put("suplente4", player9Stats);
-
-        // Define initial stats for player 10
-        int[] player10Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 10 stats to the map
-        playerStatsMap.put("suplente5", player10Stats);
-
-        // Define initial stats for player 11
-        int[] player11Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 11 stats to the map
-        playerStatsMap.put("suplente6", player11Stats);
-
-        // Define initial stats for player 12
-        int[] player12Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        // Add player 12 stats to the map
-        playerStatsMap.put("suplente7", player12Stats);
-    }
-
     private void mostrarDialogo(String tagJugador) {
         //Creamos un objeto MaterialAlertDialogBuilder, que crea un Dialog en forma de CardView
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
@@ -725,9 +443,11 @@ public class MainActivity extends AppCompatActivity {
         //Método que crea la ventana emergente del Dialog
         AlertDialog dialog = builder.create();
 
+        //Modificamos lo que muestra el Dialog cuando se carga en pantalla, en este caso actualizamos el Dialog con las estadísticas del jugador seleccionado
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialogInterface) {
+                //Definimos todos los TextViews del Dialog
                 TextView pointsTotalTextView = dialog.findViewById(R.id.textViewPuntosAnotadosDialog);
                 TextView threePointerMadeTextView = dialog.findViewById(R.id.textViewTriplesAnotadosDialog);
                 TextView threePointerTotalTextView = dialog.findViewById(R.id.textViewTriplesTotalesDialog);
@@ -746,7 +466,10 @@ public class MainActivity extends AppCompatActivity {
                 TextView madeFoulTextView = dialog.findViewById(R.id.textViewFaltasCometidasAnotadasDialog);
                 TextView valoracionTextView = dialog.findViewById(R.id.textViewValoracionConseguidaDialog);
 
+                //Definimos un Array de ints con las estadísticas dependiendo del jugador seleccionado
                 int[] playerStats = playerStatsMap.get(tagJugador);
+
+                //Definimos que estadística se corresponde con cada posición del Array
                 pointsTotalTextView.setText(String.valueOf(playerStats[0]));
                 threePointerMadeTextView.setText(String.valueOf(playerStats[1]));
                 threePointerTotalTextView.setText(String.valueOf(playerStats[2]));
@@ -766,45 +489,78 @@ public class MainActivity extends AppCompatActivity {
                 valoracionTextView.setText(String.valueOf(playerStats[16]));
             }
         });
+
         //Método que muestra el Dialog por pantalla
         dialog.show();
     }
 
-    private class MyOnTouchListener implements View.OnTouchListener {
-        private int initialX, initialY;
-        private float initialTouchX, initialTouchY;
+    //Comprobamos comparando los dos resultados si hay prórroga o no
+    private boolean hayProrroga() {
+        //Recogemos en un int los puntos anotados por el equipo local
+        int puntosLocal = Integer.parseInt(textView_puntosLocal.getText().toString());
 
+        //Recogemos en un int los puntos anotados por el equipo visitante
+        int puntosVisitante = Integer.parseInt(textView_puntosVisitante.getText().toString());
+
+        //Si las dos anotaciones son iguales, devolvemos true, por lo tanto hay prórroga
+        if (puntosLocal == puntosVisitante) {
+            return true;
+        }
+
+        //Si no son iguales, devolvemos false y no hay prórroga
+        return false;
+    }
+
+    //Clase que controla los eventos que se realizan al tocar los objetos de la pantalla
+    private class MyOnTouchListener implements View.OnTouchListener {
+        private int initialX, initialY; //Guardamos en estas variables la posición inicial de cada ImageView
+        private float initialTouchX, initialTouchY; //Guardamos en estas variables la posición de los dedos al mover el ImageView por la pantalla
+
+        //Método onTouch que controla los eventos al tocar los ImageViews
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
+            //Si la acción es ACTION_DOWN, es decir, cuando se coloca el dedo en la pantalla y se selecciona un ImageView para arrastrar
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                initialX = view.getLeft();
-                initialY = view.getTop();
-                initialTouchX = motionEvent.getRawX();
-                initialTouchY = motionEvent.getRawY();
+                initialX = view.getLeft(); //Asignamos a la izquierda la variable de la posición inicial de la X
+                initialY = view.getTop(); //Asignamos en la parte de arriba a la variable de la posición incial de la Y
+                initialTouchX = motionEvent.getRawX(); //Asignamos la posición X en la que se encuentra el dedo en la pantalla
+                initialTouchY = motionEvent.getRawY(); //Asignamos la posición Y en la que se encuentra el dedo en la pantalla
                 return true;
+
+                //Si la acción es ACTION_MOVE, es decir, cuando se mueve el dedo, y por ende, el ImageView por la pantalla
             } else if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-                int dx = (int) (motionEvent.getRawX() - initialTouchX);
-                int dy = (int) (motionEvent.getRawY() - initialTouchY);
+                int dx = (int) (motionEvent.getRawX() - initialTouchX); //Creamos una variable de tipo int y calculamos el cambio de la coordenada X basandonos en la posición actual y la inicial
+                int dy = (int) (motionEvent.getRawY() - initialTouchY); //Creamos una variable de tipo int y calculamos el cambio de la coordenada Y basandonos en la posición actual y la inicial
+
+                //Actualizamos la vista del ImageView en la pantalla según se va moviendo con los calculos anteriores
                 view.layout(initialX + dx, initialY + dy,
                         initialX + dx + view.getWidth(),
                         initialY + dy + view.getHeight());
                 return true;
+
+                //Si la acción es ACTION_UP, es decir, cuando se levanta el dedo de la pantalla y se suelta el ImageView
             } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                boolean droppedOnCardView = false;
+                boolean droppedOnCardView = false; //Creamos una variable booleana que determina si el ImageView se dropeo sobre el CardView, y lo inicializamos a false
+                //Recorremos los cinco CardViews que se encuentran en la pista para verificar lo anterior
                 for (int i = 0; i < 5; i++) {
-                    CardView cardView = cardViews[i];
+                    CardView cardView = cardViews[i]; //Comprobamos el CardView que toca según la i del for
+                    //Llamamos al método isViewOverlapping para comprobar si está superpuesto un objeto de otro
                     if (isViewOverlapping(view, cardView)) {
-                        droppedOnCardView = true;
-                        String image = (String) view.getTag();
-                        // Update player stats for the dropped ImageView
-                        updatePlayerStats(cardView, image);
+                        droppedOnCardView = true; //Al entrar en el bucle, cambiamos el booleano a true ya qué significa que un objeto está superpuseto a otro
+                        String image = (String) view.getTag(); //Recogemos el Tag del ImageView para saber que stat hay que sumar
+                        updatePlayerStats(cardView, image); // Update player stats for the dropped ImageView
+
+                        //Devolvemos el ImageView a su posición inicial, para poder volver a ser utilizado
                         view.layout(initialX, initialY,
                                 initialX + view.getWidth(),
                                 initialY + view.getHeight());
                         break;
                     }
                 }
+
+                //Si el ImageView no ha sido dropeado encima de un CardView
                 if (!droppedOnCardView) {
+                    //Devolvemos el ImageView a su posición inicial
                     view.layout(initialX, initialY,
                             initialX + view.getWidth(),
                             initialY + view.getHeight());
@@ -814,18 +570,7 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
 
-        private boolean isViewOverlapping(View view1, View view2) {
-            int[] view1Location = new int[2];
-            int[] view2Location = new int[2];
-            view1.getLocationOnScreen(view1Location);
-            view2.getLocationOnScreen(view2Location);
-            Rect rect1 = new Rect(view1Location[0], view1Location[1],
-                    view1Location[0] + view1.getWidth(), view1Location[1] + view1.getHeight());
-            Rect rect2 = new Rect(view2Location[0], view2Location[1],
-                    view2Location[0] + view2.getWidth(), view2Location[1] + view2.getHeight());
-            return rect1.intersect(rect2);
-        }
-
+        //Método para actualizar las estadísticas de los jugadores
         private void updatePlayerStats(CardView cardView, String statTag) {
             // Get the tag of the card view to determine which player it represents
             String tag = (String) cardView.getTag();
@@ -833,92 +578,143 @@ public class MainActivity extends AppCompatActivity {
             // Get the current stats of the player
             int[] playerStats = playerStatsMap.get(tag);
 
-            // Update the appropriate stat based on the image view that was dropped
+            //Actualizamos las estadísticas correspondientes según que ImageView sea dropeado
             switch (statTag) {
-                case "threePointerMade":
-                    playerStats[1]++;
-                    playerStats[2]++;
-                    playerStats[0] += 3;
-                    playerStats[16] += 3;
+                //El ImageView es el de triple anotado
+                case "tripleAnotado":
+                    playerStats[1]++; //Se suma uno a los triples metidos
+                    playerStats[2]++; //Se suma uno a los triples tirados
+                    playerStats[0] += 3; //se suman tres a los puntos totales
+                    playerStats[16] += 3; //Se suma tres a la valoración
                     break;
-                case "threePointerMissed":
-                    playerStats[2]++;
-                    playerStats[16]--;
+
+                //El ImageView es el de triple fallado
+                case "tripleFallado":
+                    playerStats[2]++; //Se suma uno a los tiros tirados
+                    playerStats[16]--; //Se resta uno a la valoración
                     break;
-                case "twoPointerMade":
-                    playerStats[3]++;
-                    playerStats[4]++;
-                    playerStats[0] += 2;
-                    playerStats[16] += 2;
+
+                //El ImageView es el de tiro de dos anotado
+                case "dosAnotado":
+                    playerStats[3]++; //Se suma uno a los tiros de dos anotados
+                    playerStats[4]++; //Se suma uno a los tiros de dos tirados
+                    playerStats[0] += 2; //Se suma dos a los puntos totales
+                    playerStats[16] += 2; //Se suma dos a la valoración
                     break;
-                case "twoPointerMissed":
-                    playerStats[4]++;
-                    playerStats[16]--;
+
+                //El ImageView es el de tiro de dos fallado
+                case "dosFallado":
+                    playerStats[4]++; //Se suma uno a los tiros de dos tirados
+                    playerStats[16]--; //Se resta uno a la valoración
                     break;
-                case "freeThrowMade":
-                    playerStats[5]++;
-                    playerStats[6]++;
-                    playerStats[0] += 1;
-                    playerStats[16] += 1;
+
+                //El ImageView es el de tiro libre anotado
+                case "libreAnotado":
+                    playerStats[5]++; //Se suma uno a los tiros libres anotados
+                    playerStats[6]++; //Se suma uno a los tiros libres tirados
+                    playerStats[0] += 1; //Se suma uno a los puntos totales
+                    playerStats[16] += 1; //Se suma uno a la valoración
                     break;
-                case "freeThrowMissed":
-                    playerStats[6]++;
-                    playerStats[16]--;
+
+                //El ImageView es el de tiro libre fallado
+                case "libreFallado":
+                    playerStats[6]++; //Se suma uno a los tiros libres tirados
+                    playerStats[16]--; //Se resta uno a la valoración
                     break;
-                case "defensiveRebound":
-                    playerStats[7]++;
-                    playerStats[9]++;
-                    playerStats[16]++;
+
+                //El ImageView es el de rebote defensivo
+                case "reboteDefensivo":
+                    playerStats[7]++; //Se suma uno a rebote defensivo
+                    playerStats[9]++; //Se suma uno a los rebotes totales
+                    playerStats[16]++; //Se suma uno a la valoración
                     break;
-                case "offensiveRebound":
-                    playerStats[8]++;
-                    playerStats[9]++;
-                    playerStats[16]++;
+
+                //El ImageView es el de rebote ofensivo
+                case "reboteOfensivo":
+                    playerStats[8]++; //Se suma uno a los rebotes ofensivos
+                    playerStats[9]++; //Se suma uno a los rebotes totales
+                    playerStats[16]++; //Se suma uno a la valoración
                     break;
-                case "assist":
-                    playerStats[10]++;
-                    playerStats[16]++;
+
+                //El ImageView es el de asistencia
+                case "asistencia":
+                    playerStats[10]++; //Se suma uno a las asistencias
+                    playerStats[16]++; //Se suma uno a la valoración
                     break;
-                case "steal":
-                    playerStats[11]++;
-                    playerStats[16]++;
+
+                //El ImageView es el del robo
+                case "robo":
+                    playerStats[11]++; //Suma uno a los robos
+                    playerStats[16]++; //Suma uno a la valoración
                     break;
-                case "block":
-                    playerStats[12]++;
-                    playerStats[16]++;
+
+                //El ImageView es el del tapón
+                case "tapon":
+                    playerStats[12]++; //Suma uno a los tapones
+                    playerStats[16]++; //Suma uno a la valoración
                     break;
-                case "turnover":
-                    playerStats[13]++;
-                    playerStats[16]--;
+
+                //El ImageView es el de la pérdida
+                case "perdida":
+                    playerStats[13]++; //Suma uno a las pérdidas
+                    playerStats[16]--; //Resta uno a la valoración
                     break;
-                case "foulReceived":
-                    playerStats[14]++;
-                    playerStats[16]++;
+
+                //El ImageView es el de la falta recibida
+                case "faltaRecibida":
+                    playerStats[14]++; //Suma uno a las faltas recibidas
+                    playerStats[16]++; //Suma uno a la valoración
                     break;
-                case "foulMade":
-                    playerStats[15]++;
-                    playerStats[16]--;
+
+                //El ImageView es el de la falta cometida
+                case "faltaCometida":
+                    playerStats[15]++; //Suma uno a las faltas cometidas
+                    playerStats[16]--; //Resta uno a la valoración
                     break;
+
+                //Opción default que no hace nada
                 default:
-                    // Do nothing if the image view doesn't represent a valid stat
                     return;
             }
 
-            // Update the text views in the card view with the new stats
+            //Actualiza el TextView de los puntos del CardView con los puntos nuevos sumados
             TextView totalPointsTextView = cardView.findViewById(R.id.textViewPuntosJugador);
             totalPointsTextView.setText(String.valueOf(playerStats[0]));
 
+            //Actualiza el TextView de los rebotes del CardView con los rebotes nuevos sumados
             TextView totalReboundsTextView = cardView.findViewById(R.id.textViewRebotesJugador);
             totalReboundsTextView.setText(String.valueOf(playerStats[9]));
 
+            //Actualiza el TextView de las asistencias del CardView con las asistencias nuevas sumadas
             TextView assistTextView = cardView.findViewById(R.id.textViewAsistenciasJugador);
             assistTextView.setText(String.valueOf(playerStats[10]));
 
+            //Actualiza el TextView de las faltas del CardView con las faltas nuevas sumadas
             TextView foulMadeTextView = cardView.findViewById(R.id.textViewFaltasJugador);
             foulMadeTextView.setText(String.valueOf(playerStats[15]));
 
-            // Update the player stats map with the new stats
+            //Actualiza las estadísticas del jugador en el Map con las nuevas estadísticas
             playerStatsMap.put(tag, playerStats);
         }
+
+        //Este método determina cuando dos objetos están superpuestos. Devuelve true si hay dos objetos superpuestos y false cuando no lo están
+        private boolean isViewOverlapping(View view1, View view2) {
+            //Creamos dos Arrays de ints que almacenaran las coordenadas X e Y de cada objeto que queramos comparar
+            int[] view1Location = new int[2];
+            int[] view2Location = new int[2];
+
+            //Asignamos las coordenadas de la esquina izquierda superior de cada objeto a las variables
+            view1.getLocationOnScreen(view1Location);
+            view2.getLocationOnScreen(view2Location);
+
+            //Con estos objetos Rect, definimos la dimension de cada objeto de forma rectangular, desde la esquina izquierda superior hasta la derecha inferior
+            Rect rect1 = new Rect(view1Location[0], view1Location[1],
+                    view1Location[0] + view1.getWidth(), view1Location[1] + view1.getHeight());
+            Rect rect2 = new Rect(view2Location[0], view2Location[1],
+                    view2Location[0] + view2.getWidth(), view2Location[1] + view2.getHeight());
+
+            //Devolvemos un booleano de si están superpuestos o no
+            return rect1.intersect(rect2);
+        }
     }
-}*/
+}
