@@ -8,6 +8,7 @@ import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -16,28 +17,35 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
     private ImageButton imageButton_Play, imageButton_Stop; //Botontes de Play y Stop del marcador
     private TextView textView_tiempo, textView_puntosLocal, textView_puntosVisitante, textView_periodo, textView_faltasLocal, textView_faltasVisitante; //Atributos del marcador
     private TextView textView_puntosJugadorCardView, textView_rebotesJugadorCardView, textView_asistenciasJugadorCardView, textView_faltasJugadorCardView; //Estadisticas en el CardView
     private CountDownTimer timer; //Timer para el timepo de cuarto
     private boolean tiempoCorriendo = false; //Define si el tiempo esta en corriendo o parado
     private long tiempoCuarto = 600000; //10 minutos en milisegundos
-    private ImageView[] imageViews;
-    private CardView[] cardViews;
-    private HashMap<String, int[]> playerStatsMap = new HashMap<>();
+    private ImageView[] imageViews; //Array de ImageViews para almacenar todos los ImageViews de las estadísticas
+    private CardView[] cardViews; //Array de CardViews para almacenar todos los CardViews de los jugadores
+    private HashMap<String, int[]> statsJugadoresMap = new HashMap<>(); //HashMap con las estadísticas de cada jugador
+    private int[] marcadorStats;
+    private ConstraintLayout enPista, banquillo;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        enPista = findViewById(R.id.constraintLayoutQuinteto);
+        banquillo = findViewById(R.id.constraintLayoutBanquillo);
 
         //Todos los TextView del marcador
         textView_puntosLocal = findViewById(R.id.textViewPuntosLocal);
@@ -74,26 +82,30 @@ public class MainActivity extends AppCompatActivity{
         imageViews[12] = findViewById(R.id.imageViewFaltaRecibida);
         imageViews[13] = findViewById(R.id.imageViewFaltaCometida);
 
-        //Array de CardViews para asignar cada CardView a cada jugador
-        cardViews = new CardView[12];
+        //Array de CardViews para asignar cada CardView a cada jugador y marcador
+        cardViews = new CardView[13];
         cardViews[0] = findViewById(R.id.cardViewBase);
         cardViews[1] = findViewById(R.id.cardViewEscolta);
         cardViews[2] = findViewById(R.id.cardViewAlero);
         cardViews[3] = findViewById(R.id.cardViewAlaPivot);
         cardViews[4] = findViewById(R.id.cardViewPivot);
-        cardViews[5] = findViewById(R.id.cardViewPivot);
-        cardViews[6] = findViewById(R.id.cardViewPivot);
-        cardViews[7] = findViewById(R.id.cardViewPivot);
-        cardViews[8] = findViewById(R.id.cardViewPivot);
-        cardViews[9] = findViewById(R.id.cardViewPivot);
-        cardViews[10] = findViewById(R.id.cardViewPivot);
-        cardViews[11] = findViewById(R.id.cardViewPivot);
+        cardViews[5] = findViewById(R.id.cardViewSuplente1);
+        cardViews[6] = findViewById(R.id.cardViewSuplente2);
+        cardViews[7] = findViewById(R.id.cardViewSuplente3);
+        cardViews[8] = findViewById(R.id.cardViewSuplente4);
+        cardViews[9] = findViewById(R.id.cardViewSuplente5);
+        cardViews[10] = findViewById(R.id.cardViewSuplente6);
+        cardViews[11] = findViewById(R.id.cardViewSuplente7);
+        cardViews[12] = findViewById(R.id.cardViewMarcador);
 
         //Método para asignar nombres a modo de Tags a cada ImageView y CardView
         darTags();
 
         //Método para inicializar todas las estadísticas de cada jugador a 0 al inicio de cada partido
-        inicializarStats();
+        inicializarStatsJugadores();
+
+        //Método para inicializar todas las estadísticas del marcador a 0 al inicio de cada partido
+        inicializarStatsMarcador();
 
         //Método que controla el flujo del tiempo del marcador
         actualizarTextoTimer();
@@ -117,19 +129,28 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        //Método que muesta el Dialog con las estadísticas del Base en pista
+
+        cardViews[0].setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                mostrarDialogo("base");
+                return true;
+            }
+        });
+
+        /*//Método que muesta el Dialog con las estadísticas del Base en pista
         cardViews[0].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarDialogo("point_guard");
+                mostrarDialogo("base");
             }
-        });
+        });*/
 
         //Método que muesta el Dialog con las estadísticas del Escolta en pista
         cardViews[1].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarDialogo("shooting_guard");
+                mostrarDialogo("escolta");
             }
         });
 
@@ -137,7 +158,7 @@ public class MainActivity extends AppCompatActivity{
         cardViews[2].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarDialogo("small_forward");
+                mostrarDialogo("alero");
             }
         });
 
@@ -145,7 +166,7 @@ public class MainActivity extends AppCompatActivity{
         cardViews[3].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarDialogo("power_forward");
+                mostrarDialogo("ala_pivot");
             }
         });
 
@@ -153,7 +174,7 @@ public class MainActivity extends AppCompatActivity{
         cardViews[4].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarDialogo("center");
+                mostrarDialogo("pivot");
             }
         });
 
@@ -217,6 +238,14 @@ public class MainActivity extends AppCompatActivity{
         for (ImageView imageView : imageViews) {
             imageView.setOnTouchListener(new MyOnTouchListener());
         }
+
+        /*//Asignamos el movimiento de los CardViews con un bucle for
+        for (CardView cardView : cardViews) {
+            cardView.setOnTouchListener(new MyOnTouchListener());
+        }*/
+
+        TextView nombreJugador = cardViews[0].findViewById(R.id.textViewNombreJugador);
+        nombreJugador.setText("Hugo");
     }
 
     //Método para dar Tags a cada CardView
@@ -233,6 +262,7 @@ public class MainActivity extends AppCompatActivity{
         cardViews[9].setTag("suplente5");
         cardViews[10].setTag("suplente6");
         cardViews[11].setTag("suplente7");
+        cardViews[12].setTag("marcador");
 
         imageViews[0].setTag("tripleAnotado");
         imageViews[1].setTag("tripleFallado");
@@ -251,78 +281,83 @@ public class MainActivity extends AppCompatActivity{
     }
 
     //Método para inicializar todas las stats de todos los jugadores a 0
-    private void inicializarStats() {
+    private void inicializarStatsJugadores() {
         //Define a 0 las stats del base
-        int[] player1Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsBase = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al base al Map de jugadores
-        playerStatsMap.put("base", player1Stats);
+        statsJugadoresMap.put("base", statsBase);
 
         //Define a 0 las stats del escolta
-        int[] player2Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsEscolta = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al escolta al Map de jugadores
-        playerStatsMap.put("escolta", player2Stats);
+        statsJugadoresMap.put("escolta", statsEscolta);
 
         //Define a 0 las stats del alero
-        int[] player3Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsAlero = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al alero al Map de jugadores
-        playerStatsMap.put("alero", player3Stats);
+        statsJugadoresMap.put("alero", statsAlero);
 
         //Define a 0 las stats del ala_pivot
-        int[] player4Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsAlaPivot = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al ala_pivot al Map de jugadores
-        playerStatsMap.put("ala_pivot", player4Stats);
+        statsJugadoresMap.put("ala_pivot", statsAlaPivot);
 
         //Define a 0 las stats del pivot
-        int[] player5Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsPivot = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al pivot al Map de jugadores
-        playerStatsMap.put("pivot", player5Stats);
+        statsJugadoresMap.put("pivot", statsPivot);
 
         //Define a 0 las stats del suplente 1
-        int[] player6Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsSuplente1 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al suplente 1 al Map de jugadores
-        playerStatsMap.put("suplente1", player6Stats);
+        statsJugadoresMap.put("suplente1", statsSuplente1);
 
         //Define a 0 las stats del suplente 2
-        int[] player7Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsSuplente2 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al suplente 2 al Map de jugadores
-        playerStatsMap.put("suplente2", player7Stats);
+        statsJugadoresMap.put("suplente2", statsSuplente2);
 
         //Define a 0 las stats del suplente 3
-        int[] player8Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsSuplente3 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al suplente 3 al Map de jugadores
-        playerStatsMap.put("suplente3", player8Stats);
+        statsJugadoresMap.put("suplente3", statsSuplente3);
 
         //Define a 0 las stats del suplente 4
-        int[] player9Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsSuplente4 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al suplente 4 al Map de jugadores
-        playerStatsMap.put("suplente4", player9Stats);
+        statsJugadoresMap.put("suplente4", statsSuplente4);
 
         //Define a 0 las stats del suplente 5
-        int[] player10Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsSuplente5 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al suplente 5 al Map de jugadores
-        playerStatsMap.put("suplente5", player10Stats);
+        statsJugadoresMap.put("suplente5", statsSuplente5);
 
         //Define a 0 las stats del suplente 6
-        int[] player11Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsSuplente6 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al suplente 6 al Map de jugadores
-        playerStatsMap.put("suplente6", player11Stats);
+        statsJugadoresMap.put("suplente6", statsSuplente6);
 
         //Define a 0 las stats del suplente 7
-        int[] player12Stats = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] statsSuplente7 = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         //Añade al suplente 7 al Map de jugadores
-        playerStatsMap.put("suplente7", player12Stats);
+        statsJugadoresMap.put("suplente7", statsSuplente7);
+    }
+
+    //Método que inicializa a cero las stats del marcador
+    private void inicializarStatsMarcador() {
+        marcadorStats = new int[]{0, 0, 0, 0};
     }
 
     //Método que controla el comienzo del timer
@@ -369,7 +404,12 @@ public class MainActivity extends AppCompatActivity{
             periodo++; //Incrementamos en uno el periodo
 
             String periodoStr = String.valueOf(periodo); //Transformamos el int en String para poder asignarselo al TextView
-            textView_periodo.setText(periodoStr); //Asignamos el String al TextView con el periodo actualizado
+
+            if (periodo > 4) {
+                textView_periodo.setText("Fin"); //Asignamos el String al TextView con el periodo actualizado
+            } else {
+                textView_periodo.setText(periodoStr); //Asignamos el String al TextView con el periodo actualizado
+            }
 
             if (periodo <= 4) { //Comprobamos si el periodo es menor o igual a 4, los cuartos que tiene un partido de baloncesto
                 periodo = Integer.parseInt(textView_periodo.getText().toString()); //Transformamos el String en un valor int
@@ -396,8 +436,10 @@ public class MainActivity extends AppCompatActivity{
                 String periodoStr = "PR " + (periodoNumero + 1); //Creamos un String aplicando el formato de la prórroga, sumando un periodo más
                 textView_periodo.setText(periodoStr); //Asignamos el String al TextView
             } else {
-                //Mostramos un mensaje emergente de que el partido ha terminado
-                Toast.makeText(this, "El partido ha terminado", Toast.LENGTH_SHORT).show();
+                imageButton_Play.setEnabled(false); //Desactivamos el botón de Play
+                imageButton_Stop.setEnabled(false); //Desactivamos el botón de Stop
+                textView_periodo.setText("Fin"); //Asignamos el String al TextView con el periodo actualizado
+                Toast.makeText(this, "El partido ha terminado", Toast.LENGTH_SHORT).show(); //Mostramos un mensaje emergente de que el partido ha terminado
             }
         }
     }
@@ -415,6 +457,23 @@ public class MainActivity extends AppCompatActivity{
         int seconds = (int) (tiempoCuarto / 1000) % 60; //Creamos la varibale de los segundos
         String timeLeftFormatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds); //Creamos la variable del tiempo, personalizandola para que tenga el formato de minutos:segundos
         textView_tiempo.setText(timeLeftFormatted); //Asignamos el tiempo al TextView del marcador
+    }
+
+    //Comprobamos comparando los dos resultados si hay prórroga o no
+    private boolean hayProrroga() {
+        //Recogemos en un int los puntos anotados por el equipo local
+        int puntosLocal = Integer.parseInt(textView_puntosLocal.getText().toString());
+
+        //Recogemos en un int los puntos anotados por el equipo visitante
+        int puntosVisitante = Integer.parseInt(textView_puntosVisitante.getText().toString());
+
+        //Si las dos anotaciones son iguales, devolvemos true, por lo tanto hay prórroga
+        if (puntosLocal == puntosVisitante) {
+            return true;
+        }
+
+        //Si no son iguales, devolvemos false y no hay prórroga
+        return false;
     }
 
     //Método que muesta el Dialog con las estadísticas del jugador en cuestión
@@ -467,7 +526,7 @@ public class MainActivity extends AppCompatActivity{
                 TextView valoracionTextView = dialog.findViewById(R.id.textViewValoracionConseguidaDialog);
 
                 //Definimos un Array de ints con las estadísticas dependiendo del jugador seleccionado
-                int[] playerStats = playerStatsMap.get(tagJugador);
+                int[] playerStats = statsJugadoresMap.get(tagJugador);
 
                 //Definimos que estadística se corresponde con cada posición del Array
                 pointsTotalTextView.setText(String.valueOf(playerStats[0]));
@@ -492,23 +551,6 @@ public class MainActivity extends AppCompatActivity{
 
         //Método que muestra el Dialog por pantalla
         dialog.show();
-    }
-
-    //Comprobamos comparando los dos resultados si hay prórroga o no
-    private boolean hayProrroga() {
-        //Recogemos en un int los puntos anotados por el equipo local
-        int puntosLocal = Integer.parseInt(textView_puntosLocal.getText().toString());
-
-        //Recogemos en un int los puntos anotados por el equipo visitante
-        int puntosVisitante = Integer.parseInt(textView_puntosVisitante.getText().toString());
-
-        //Si las dos anotaciones son iguales, devolvemos true, por lo tanto hay prórroga
-        if (puntosLocal == puntosVisitante) {
-            return true;
-        }
-
-        //Si no son iguales, devolvemos false y no hay prórroga
-        return false;
     }
 
     //Clase que controla los eventos que se realizan al tocar los objetos de la pantalla
@@ -542,7 +584,7 @@ public class MainActivity extends AppCompatActivity{
             } else if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                 boolean droppedOnCardView = false; //Creamos una variable booleana que determina si el ImageView se dropeo sobre el CardView, y lo inicializamos a false
                 //Recorremos los cinco CardViews que se encuentran en la pista para verificar lo anterior
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 13; i++) {
                     CardView cardView = cardViews[i]; //Comprobamos el CardView que toca según la i del for
                     //Llamamos al método isViewOverlapping para comprobar si está superpuesto un objeto de otro
                     if (isViewOverlapping(view, cardView)) {
@@ -572,129 +614,239 @@ public class MainActivity extends AppCompatActivity{
 
         //Método para actualizar las estadísticas de los jugadores
         private void updatePlayerStats(CardView cardView, String statTag) {
-            // Get the tag of the card view to determine which player it represents
-            String tag = (String) cardView.getTag();
+            String tag = (String) cardView.getTag(); //Obtenemos y guardamos el Tag del CardView que queremos actualizar las estadísticas
+            int[] playerStats = statsJugadoresMap.get(tag); //Obtenemos y guardamos en un Array de ints las estadísticas del jugador
 
-            // Get the current stats of the player
-            int[] playerStats = playerStatsMap.get(tag);
+            if (textView_periodo.getText().toString().equals("Fin")) {
+                Toast.makeText(getApplicationContext(), "El partido ha terminado", Toast.LENGTH_SHORT).show(); //Mostramos un mensaje emergente de que el partido ha terminado
+            } else {
+                //Actualizamos las estadísticas correspondientes según que ImageView sea dropeado
+                switch (statTag) {
+                    //El ImageView es el de triple anotado
+                    case "tripleAnotado":
+                        if (Objects.equals(tag, "marcador")) {
+                            marcadorStats[1] += 3; //Si el tag es marcador, se suma tres a los puntos al equipo visitante
+                        } else {
+                            playerStats[1]++; //Se suma uno a los triples metidos
+                            playerStats[2]++; //Se suma uno a los triples tirados
+                            playerStats[0] += 3; //se suman tres a los puntos totales
+                            playerStats[16] += 3; //Se suma tres a la valoración
+                            marcadorStats[0] += 3; //Se suma tres a los puntos del equipo local
+                        }
 
-            //Actualizamos las estadísticas correspondientes según que ImageView sea dropeado
-            switch (statTag) {
-                //El ImageView es el de triple anotado
-                case "tripleAnotado":
-                    playerStats[1]++; //Se suma uno a los triples metidos
-                    playerStats[2]++; //Se suma uno a los triples tirados
-                    playerStats[0] += 3; //se suman tres a los puntos totales
-                    playerStats[16] += 3; //Se suma tres a la valoración
-                    break;
+                        break;
 
-                //El ImageView es el de triple fallado
-                case "tripleFallado":
-                    playerStats[2]++; //Se suma uno a los tiros tirados
-                    playerStats[16]--; //Se resta uno a la valoración
-                    break;
+                    //El ImageView es el de triple fallado
+                    case "tripleFallado":
+                        if (tag.equals("marcador")) {
+                            //No se hace nada
+                        } else {
+                            playerStats[2]++; //Se suma uno a los tiros tirados
+                            playerStats[16]--; //Se resta uno a la valoración
+                        }
 
-                //El ImageView es el de tiro de dos anotado
-                case "dosAnotado":
-                    playerStats[3]++; //Se suma uno a los tiros de dos anotados
-                    playerStats[4]++; //Se suma uno a los tiros de dos tirados
-                    playerStats[0] += 2; //Se suma dos a los puntos totales
-                    playerStats[16] += 2; //Se suma dos a la valoración
-                    break;
+                        break;
 
-                //El ImageView es el de tiro de dos fallado
-                case "dosFallado":
-                    playerStats[4]++; //Se suma uno a los tiros de dos tirados
-                    playerStats[16]--; //Se resta uno a la valoración
-                    break;
+                    //El ImageView es el de tiro de dos anotado
+                    case "dosAnotado":
+                        if (tag.equals("marcador")) {
+                            marcadorStats[1] += 2; //Si el tag es marcador, se suma dos a los puntos del equipo visitante
+                        } else {
+                            playerStats[3]++; //Se suma uno a los tiros de dos anotados
+                            playerStats[4]++; //Se suma uno a los tiros de dos tirados
+                            playerStats[0] += 2; //Se suma dos a los puntos totales
+                            playerStats[16] += 2; //Se suma dos a la valoración
+                            marcadorStats[0] += 2; //Se suma dos a los puntos del equipo local
+                        }
 
-                //El ImageView es el de tiro libre anotado
-                case "libreAnotado":
-                    playerStats[5]++; //Se suma uno a los tiros libres anotados
-                    playerStats[6]++; //Se suma uno a los tiros libres tirados
-                    playerStats[0] += 1; //Se suma uno a los puntos totales
-                    playerStats[16] += 1; //Se suma uno a la valoración
-                    break;
+                        break;
 
-                //El ImageView es el de tiro libre fallado
-                case "libreFallado":
-                    playerStats[6]++; //Se suma uno a los tiros libres tirados
-                    playerStats[16]--; //Se resta uno a la valoración
-                    break;
+                    //El ImageView es el de tiro de dos fallado
+                    case "dosFallado":
+                        if (tag.equals("marcador")) {
+                            //No se hace nada
+                        } else {
+                            playerStats[4]++; //Se suma uno a los tiros de dos tirados
+                            playerStats[16]--; //Se resta uno a la valoración
+                        }
 
-                //El ImageView es el de rebote defensivo
-                case "reboteDefensivo":
-                    playerStats[7]++; //Se suma uno a rebote defensivo
-                    playerStats[9]++; //Se suma uno a los rebotes totales
-                    playerStats[16]++; //Se suma uno a la valoración
-                    break;
+                        break;
 
-                //El ImageView es el de rebote ofensivo
-                case "reboteOfensivo":
-                    playerStats[8]++; //Se suma uno a los rebotes ofensivos
-                    playerStats[9]++; //Se suma uno a los rebotes totales
-                    playerStats[16]++; //Se suma uno a la valoración
-                    break;
+                    //El ImageView es el de tiro libre anotado
+                    case "libreAnotado":
+                        if (tag.equals("marcador")) {
+                            marcadorStats[1] += 1; //Si el tag es marcador, se suma uno a los puntos del equipo visitante
+                        } else {
+                            playerStats[5]++; //Se suma uno a los tiros libres anotados
+                            playerStats[6]++; //Se suma uno a los tiros libres tirados
+                            playerStats[0] += 1; //Se suma uno a los puntos totales
+                            playerStats[16] += 1; //Se suma uno a la valoración
+                            marcadorStats[0] += 1; //Se suma uno a los puntos del equipo local
+                        }
 
-                //El ImageView es el de asistencia
-                case "asistencia":
-                    playerStats[10]++; //Se suma uno a las asistencias
-                    playerStats[16]++; //Se suma uno a la valoración
-                    break;
+                        break;
 
-                //El ImageView es el del robo
-                case "robo":
-                    playerStats[11]++; //Suma uno a los robos
-                    playerStats[16]++; //Suma uno a la valoración
-                    break;
+                    //El ImageView es el de tiro libre fallado
+                    case "libreFallado":
+                        if (tag.equals("marcador")) {
+                            //No se hace nada
+                        } else {
+                            playerStats[6]++; //Se suma uno a los tiros libres tirados
+                            playerStats[16]--; //Se resta uno a la valoración
+                        }
 
-                //El ImageView es el del tapón
-                case "tapon":
-                    playerStats[12]++; //Suma uno a los tapones
-                    playerStats[16]++; //Suma uno a la valoración
-                    break;
+                        break;
 
-                //El ImageView es el de la pérdida
-                case "perdida":
-                    playerStats[13]++; //Suma uno a las pérdidas
-                    playerStats[16]--; //Resta uno a la valoración
-                    break;
+                    //El ImageView es el de rebote defensivo
+                    case "reboteDefensivo":
+                        if (tag.equals("marcador")) {
+                            //No se hace nada
+                        } else {
+                            playerStats[7]++; //Se suma uno a rebote defensivo
+                            playerStats[9]++; //Se suma uno a los rebotes totales
+                            playerStats[16]++; //Se suma uno a la valoración
+                        }
 
-                //El ImageView es el de la falta recibida
-                case "faltaRecibida":
-                    playerStats[14]++; //Suma uno a las faltas recibidas
-                    playerStats[16]++; //Suma uno a la valoración
-                    break;
+                        break;
 
-                //El ImageView es el de la falta cometida
-                case "faltaCometida":
-                    playerStats[15]++; //Suma uno a las faltas cometidas
-                    playerStats[16]--; //Resta uno a la valoración
-                    break;
+                    //El ImageView es el de rebote ofensivo
+                    case "reboteOfensivo":
+                        if (tag.equals("marcador")) {
+                            //No se hace nada
+                        } else {
+                            playerStats[8]++; //Se suma uno a los rebotes ofensivos
+                            playerStats[9]++; //Se suma uno a los rebotes totales
+                            playerStats[16]++; //Se suma uno a la valoración
+                        }
 
-                //Opción default que no hace nada
-                default:
-                    return;
+                        break;
+
+                    //El ImageView es el de asistencia
+                    case "asistencia":
+                        if (tag.equals("marcador")) {
+                            //No se hace nada
+                        } else {
+                            playerStats[10]++; //Se suma uno a las asistencias
+                            playerStats[16]++; //Se suma uno a la valoración
+                        }
+
+                        break;
+
+                    //El ImageView es el del robo
+                    case "robo":
+                        if (tag.equals("marcador")) {
+                            //No se hace nada
+                        } else {
+                            playerStats[11]++; //Suma uno a los robos
+                            playerStats[16]++; //Suma uno a la valoración
+                        }
+
+                        break;
+
+                    //El ImageView es el del tapón
+                    case "tapon":
+                        if (tag.equals("marcador")) {
+                            //No se hace nada
+                        } else {
+                            playerStats[12]++; //Suma uno a los tapones
+                            playerStats[16]++; //Suma uno a la valoración
+                        }
+
+                        break;
+
+                    //El ImageView es el de la pérdida
+                    case "perdida":
+                        if (tag.equals("marcador")) {
+                            //No se hace nada
+                        } else {
+                            playerStats[13]++; //Suma uno a las pérdidas
+                            playerStats[16]--; //Resta uno a la valoración
+                        }
+
+                        break;
+
+                    //El ImageView es el de la falta recibida
+                    case "faltaRecibida":
+                        if (tag.equals("marcador")) {
+                            marcadorStats[3]++; //Si el tag es marcador, se suma uno a las faltas del equipo visitante
+                        } else {
+                            playerStats[14]++; //Suma uno a las faltas recibidas
+                            playerStats[16]++; //Suma uno a la valoración
+                            marcadorStats[3]++; //Se suma uno a las faltas del equipo visitante
+                        }
+
+                        break;
+
+                    //El ImageView es el de la falta cometida
+                    case "faltaCometida":
+                        if (tag.equals("marcador")) {
+                            marcadorStats[2]++; //Se el tag es uno, se suma uno a las faltas del equipo local
+                        } else {
+                            playerStats[15]++; //Suma uno a las faltas cometidas
+                            playerStats[16]--; //Resta uno a la valoración
+                            marcadorStats[2]++; //Se suma uno a las faltas del equipo local
+                        }
+
+                        break;
+
+                    //Opción default que no hace nada
+                    default:
+                        return;
+                }
+
+                if (tag.equals("marcador")) {
+                    //Actualiza el TextView de los puntos del equipo local en el marcador
+                    TextView puntosLocalTextView = cardViews[12].findViewById(R.id.textViewPuntosLocal);
+                    puntosLocalTextView.setText(String.valueOf(marcadorStats[0]));
+
+                    //Actualiza el TextView de los puntos del equipo visitante en el marcador
+                    TextView puntosVisitanteTextView = cardViews[12].findViewById(R.id.textViewPuntosVisitante);
+                    puntosVisitanteTextView.setText(String.valueOf(marcadorStats[1]));
+
+                    //Actualiza el TextView de las faltas del equipo local en el marcador
+                    TextView faltasLocalTextView = cardViews[12].findViewById(R.id.textViewNumeroFaltasLocal);
+                    faltasLocalTextView.setText(String.valueOf(marcadorStats[2]));
+
+                    //Actualiza el TextView de las faltas del equipo visitante en el marcador
+                    TextView faltasVisitanteTextView = cardViews[12].findViewById(R.id.textViewNumeroFaltasVisitante);
+                    faltasVisitanteTextView.setText(String.valueOf(marcadorStats[3]));
+                } else {
+                    //Actualiza el TextView de los puntos del CardView con los puntos nuevos sumados
+                    TextView totalPointsTextView = cardView.findViewById(R.id.textViewPuntosJugador);
+                    totalPointsTextView.setText(String.valueOf(playerStats[0]));
+
+                    //Actualiza el TextView de los rebotes del CardView con los rebotes nuevos sumados
+                    TextView totalReboundsTextView = cardView.findViewById(R.id.textViewRebotesJugador);
+                    totalReboundsTextView.setText(String.valueOf(playerStats[9]));
+
+                    //Actualiza el TextView de las asistencias del CardView con las asistencias nuevas sumadas
+                    TextView assistTextView = cardView.findViewById(R.id.textViewAsistenciasJugador);
+                    assistTextView.setText(String.valueOf(playerStats[10]));
+
+                    //Actualiza el TextView de las faltas del CardView con las faltas nuevas sumadas
+                    TextView foulMadeTextView = cardView.findViewById(R.id.textViewFaltasJugador);
+                    foulMadeTextView.setText(String.valueOf(playerStats[15]));
+
+                    //Actualiza el TextView de los puntos del equipo local en el marcador
+                    TextView puntosLocalTextView = cardViews[12].findViewById(R.id.textViewPuntosLocal);
+                    puntosLocalTextView.setText(String.valueOf(marcadorStats[0]));
+
+                    //Actualiza el TextView de los puntos del equipo visitante en el marcador
+                    TextView puntosVisitanteTextView = cardViews[12].findViewById(R.id.textViewPuntosVisitante);
+                    puntosVisitanteTextView.setText(String.valueOf(marcadorStats[1]));
+
+                    //Actualiza el TextView de las faltas del equipo local en el marcador
+                    TextView faltasLocalTextView = cardViews[12].findViewById(R.id.textViewNumeroFaltasLocal);
+                    faltasLocalTextView.setText(String.valueOf(marcadorStats[2]));
+
+                    //Actualiza el TextView de las faltas del equipo visitante en el marcador
+                    TextView faltasVisitanteTextView = cardViews[12].findViewById(R.id.textViewNumeroFaltasVisitante);
+                    faltasVisitanteTextView.setText(String.valueOf(marcadorStats[3]));
+                }
+
+                //Actualiza las estadísticas del jugador en el Map con las nuevas estadísticas
+                statsJugadoresMap.put(tag, playerStats);
             }
-
-            //Actualiza el TextView de los puntos del CardView con los puntos nuevos sumados
-            TextView totalPointsTextView = cardView.findViewById(R.id.textViewPuntosJugador);
-            totalPointsTextView.setText(String.valueOf(playerStats[0]));
-
-            //Actualiza el TextView de los rebotes del CardView con los rebotes nuevos sumados
-            TextView totalReboundsTextView = cardView.findViewById(R.id.textViewRebotesJugador);
-            totalReboundsTextView.setText(String.valueOf(playerStats[9]));
-
-            //Actualiza el TextView de las asistencias del CardView con las asistencias nuevas sumadas
-            TextView assistTextView = cardView.findViewById(R.id.textViewAsistenciasJugador);
-            assistTextView.setText(String.valueOf(playerStats[10]));
-
-            //Actualiza el TextView de las faltas del CardView con las faltas nuevas sumadas
-            TextView foulMadeTextView = cardView.findViewById(R.id.textViewFaltasJugador);
-            foulMadeTextView.setText(String.valueOf(playerStats[15]));
-
-            //Actualiza las estadísticas del jugador en el Map con las nuevas estadísticas
-            playerStatsMap.put(tag, playerStats);
         }
 
         //Este método determina cuando dos objetos están superpuestos. Devuelve true si hay dos objetos superpuestos y false cuando no lo están
@@ -715,6 +867,28 @@ public class MainActivity extends AppCompatActivity{
 
             //Devolvemos un booleano de si están superpuestos o no
             return rect1.intersect(rect2);
+        }
+
+        public void sustituirJugadores(CardView jugadorEntra, CardView jugadorSale) {
+            Rect rect1 = new Rect();
+            jugadorEntra.getGlobalVisibleRect(rect1);
+            Rect rect2 = new Rect();
+            jugadorSale.getGlobalVisibleRect(rect2);
+            if (Rect.intersects(rect1, rect2)) {
+                // Get the parent ViewGroup
+                ViewGroup parent = (ViewGroup) jugadorEntra.getParent();
+
+                // Remove both CardViews from the parent ViewGroup
+                parent.removeView(jugadorEntra);
+                parent.removeView(jugadorSale);
+
+                // Add the CardViews back to the parent ViewGroup in the reverse order
+                parent.addView(jugadorSale);
+                parent.addView(jugadorEntra);
+
+                // Request a layout update
+                parent.requestLayout();
+            }
         }
     }
 }
