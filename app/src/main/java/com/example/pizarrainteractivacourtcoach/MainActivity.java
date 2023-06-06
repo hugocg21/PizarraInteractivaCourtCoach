@@ -1,16 +1,25 @@
 package com.example.pizarrainteractivacourtcoach;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.content.ClipData;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.view.DragEvent;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,11 +30,13 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
+    Button button_banquillo;
     private ImageButton imageButton_Play, imageButton_Stop; //Botontes de Play y Stop del marcador
     private TextView textView_tiempo, textView_puntosLocal, textView_puntosVisitante, textView_periodo, textView_faltasLocal, textView_faltasVisitante; //Atributos del marcador
     private TextView textView_puntosJugadorCardView, textView_rebotesJugadorCardView, textView_asistenciasJugadorCardView, textView_faltasJugadorCardView; //Estadisticas en el CardView
@@ -33,10 +44,12 @@ public class MainActivity extends AppCompatActivity {
     private boolean tiempoCorriendo = false; //Define si el tiempo esta en corriendo o parado
     private long tiempoCuarto = 600000; //10 minutos en milisegundos
     private ImageView[] imageViews; //Array de ImageViews para almacenar todos los ImageViews de las estadísticas
-    private CardView[] cardViews; //Array de CardViews para almacenar todos los CardViews de los jugadores
+    private CardView[] cardViewsEnPista, cardViewsBanquillo; //Array de CardViews para almacenar todos los CardViews de los jugadores
+    private CardView marcador;
     private HashMap<String, int[]> statsJugadoresMap = new HashMap<>(); //HashMap con las estadísticas de cada jugador
     private int[] marcadorStats;
-    private ConstraintLayout enPista, banquillo;
+    private ConstraintLayout enPista;
+    private int numJugadoresConvocados = 12;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -45,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         enPista = findViewById(R.id.constraintLayoutQuinteto);
-        banquillo = findViewById(R.id.constraintLayoutBanquillo);
+
+        button_banquillo = findViewById(R.id.buttonBanquillo);
 
         //Todos los TextView del marcador
         textView_puntosLocal = findViewById(R.id.textViewPuntosLocal);
@@ -83,20 +97,18 @@ public class MainActivity extends AppCompatActivity {
         imageViews[13] = findViewById(R.id.imageViewFaltaCometida);
 
         //Array de CardViews para asignar cada CardView a cada jugador y marcador
-        cardViews = new CardView[13];
-        cardViews[0] = findViewById(R.id.cardViewBase);
-        cardViews[1] = findViewById(R.id.cardViewEscolta);
-        cardViews[2] = findViewById(R.id.cardViewAlero);
-        cardViews[3] = findViewById(R.id.cardViewAlaPivot);
-        cardViews[4] = findViewById(R.id.cardViewPivot);
-        cardViews[5] = findViewById(R.id.cardViewSuplente1);
-        cardViews[6] = findViewById(R.id.cardViewSuplente2);
-        cardViews[7] = findViewById(R.id.cardViewSuplente3);
-        cardViews[8] = findViewById(R.id.cardViewSuplente4);
-        cardViews[9] = findViewById(R.id.cardViewSuplente5);
-        cardViews[10] = findViewById(R.id.cardViewSuplente6);
-        cardViews[11] = findViewById(R.id.cardViewSuplente7);
-        cardViews[12] = findViewById(R.id.cardViewMarcador);
+        cardViewsEnPista = new CardView[5];
+        cardViewsEnPista[0] = findViewById(R.id.cardViewBase);
+        cardViewsEnPista[1] = findViewById(R.id.cardViewEscolta);
+        cardViewsEnPista[2] = findViewById(R.id.cardViewAlero);
+        cardViewsEnPista[3] = findViewById(R.id.cardViewAlaPivot);
+        cardViewsEnPista[4] = findViewById(R.id.cardViewPivot);
+
+        int numJugadoresBanquillo = numJugadoresConvocados - 5;
+
+        cardViewsBanquillo = new CardView[numJugadoresBanquillo];
+
+        marcador = findViewById(R.id.cardViewMarcador);
 
         //Método para asignar nombres a modo de Tags a cada ImageView y CardView
         darTags();
@@ -129,140 +141,139 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        cardViews[0].setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                mostrarDialogo("base");
-                return true;
-            }
-        });
-
-        /*//Método que muesta el Dialog con las estadísticas del Base en pista
-        cardViews[0].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("base");
-            }
-        });*/
-
-        //Método que muesta el Dialog con las estadísticas del Escolta en pista
-        cardViews[1].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("escolta");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Alero en pista
-        cardViews[2].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("alero");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Alapivot en pista
-        cardViews[3].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("ala_pivot");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del Pivot en pista
-        cardViews[4].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("pivot");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del suplente 1 en pista
-        cardViews[5].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente1");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del suplente 2 en pista
-        cardViews[6].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente2");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del suplente 3 en pista
-        cardViews[7].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente3");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del suplente 4 en pista
-        cardViews[8].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente4");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del suplente 5 en pista
-        cardViews[9].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente5");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del suplente 6 en pista
-        cardViews[10].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente6");
-            }
-        });
-
-        //Método que muesta el Dialog con las estadísticas del suplente 7 en pista
-        cardViews[11].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mostrarDialogo("suplente7");
-            }
-        });
-
         //Asignamos el movimiento de los ImageViews con un bucle for
         for (ImageView imageView : imageViews) {
             imageView.setOnTouchListener(new MyOnTouchListener());
         }
 
+        //Asignamos el movimiento de los CardViews que están en pista con un bucle for
+        for (CardView cardView : cardViewsEnPista) {
+            cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mostrarDialogo((String) cardView.getTag());
+                }
+            });
+        }
+
+        for (CardView cardView : cardViewsEnPista) {
+            cardView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    ClipData clipData = ClipData.newPlainText("", "");
+                    View.DragShadowBuilder dragShadowBuilder = new View.DragShadowBuilder(view);
+                    view.startDragAndDrop(clipData, dragShadowBuilder, view, 0);
+                    return true;
+                }
+            });
+        }
+
+        //
+        button_banquillo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarBanquillo();
+            }
+        });
+    }
+
+    public void mostrarBanquillo() {
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.bottom_sheet_layout);
+
+        ImageView cerrarDialog = dialog.findViewById(R.id.imageViewCerrarDesplegable);
+        LinearLayout jugadores = dialog.findViewById(R.id.linearLayoutJugadores);
+
+        int numJugadoresBanquillo = numJugadoresConvocados - 5;
+
+        for (int i = 0; i < numJugadoresBanquillo; i++) {
+            int numJugador = 1;
+            String tagJugador = "suplente" + numJugador;
+            numJugador++;
+            View cardView = getLayoutInflater().inflate(R.layout.jugador, null);
+            cardViewsBanquillo[i] = (CardView) cardView;
+            cardViewsBanquillo[i].setTag(tagJugador);
+            jugadores.addView(cardView);
+        }
+
         /*//Asignamos el movimiento de los CardViews con un bucle for
-        for (CardView cardView : cardViews) {
-            cardView.setOnTouchListener(new MyOnTouchListener());
+        for (CardView cardView : cardViewsBanquillo) {
+            cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mostrarDialogo((String) cardView.getTag());
+                }
+            });
         }*/
 
-        TextView nombreJugador = cardViews[0].findViewById(R.id.textViewNombreJugador);
-        nombreJugador.setText("Hugo");
+        for (CardView cardView : cardViewsBanquillo) {
+            cardView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    ClipData clipData = ClipData.newPlainText("", "");
+                    View.DragShadowBuilder dragShadowBuilder = new View.DragShadowBuilder(view);
+                    view.startDragAndDrop(clipData, dragShadowBuilder, view, 0);
+                    dialog.dismiss();
+
+                    cardView.setOnDragListener(new View.OnDragListener() {
+                        @Override
+                        public boolean onDrag(View v, DragEvent event) {
+                            int action = event.getAction();
+                            switch (action) {
+                                case DragEvent.ACTION_DROP:
+                                    // Obtener la vista arrastrada
+                                    CardView draggedCardView = (CardView) event.getLocalState();
+                                    // Obtener el índice de la vista arrastrada en los jugadores del banquillo
+                                    int indexInBanquillo = Arrays.asList(cardViewsBanquillo).indexOf(draggedCardView);
+                                    // Obtener el índice de la vista sobre la cual se soltó
+                                    int indexInPista = Arrays.asList(cardViewsEnPista).indexOf(v);
+                                    // Comprobar si se soltó encima de otro CardView
+                                    if (indexInPista != -1) {
+                                        // Obtener el CardView en pista que será reemplazado
+                                        CardView cardViewEnPista = cardViewsEnPista[indexInPista];
+                                        // Realizar la sustitución en los arrays
+                                        cardViewsBanquillo[indexInBanquillo] = cardViewEnPista;
+                                        cardViewsEnPista[indexInPista] = draggedCardView;
+                                        // Actualizar la vista en la pantalla
+                                        enPista.removeView(cardViewEnPista);
+                                        enPista.addView(draggedCardView, indexInPista);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                            return true;
+                        }
+                    });
+
+                    return true;
+                }
+            });
+        }
+
+        cerrarDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Cerramos el Dialog
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT); //Le ajustamos las dimensiones
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT)); //Le cambiamos el color de fondo
+        dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation; //Le aplicamos las animaciones
+        dialog.getWindow().setGravity(Gravity.BOTTOM); //Lo iniciamos en la parte inferior de la pantalla
     }
 
     //Método para dar Tags a cada CardView
     private void darTags() {
-        cardViews[0].setTag("base");
-        cardViews[1].setTag("escolta");
-        cardViews[2].setTag("alero");
-        cardViews[3].setTag("ala_pivot");
-        cardViews[4].setTag("pivot");
-        cardViews[5].setTag("suplente1");
-        cardViews[6].setTag("suplente2");
-        cardViews[7].setTag("suplente3");
-        cardViews[8].setTag("suplente4");
-        cardViews[9].setTag("suplente5");
-        cardViews[10].setTag("suplente6");
-        cardViews[11].setTag("suplente7");
-        cardViews[12].setTag("marcador");
+        cardViewsEnPista[0].setTag("base");
+        cardViewsEnPista[1].setTag("escolta");
+        cardViewsEnPista[2].setTag("alero");
+        cardViewsEnPista[3].setTag("ala_pivot");
+        cardViewsEnPista[4].setTag("pivot");
 
         imageViews[0].setTag("tripleAnotado");
         imageViews[1].setTag("tripleFallado");
@@ -585,7 +596,7 @@ public class MainActivity extends AppCompatActivity {
                 boolean droppedOnCardView = false; //Creamos una variable booleana que determina si el ImageView se dropeo sobre el CardView, y lo inicializamos a false
                 //Recorremos los cinco CardViews que se encuentran en la pista para verificar lo anterior
                 for (int i = 0; i < 13; i++) {
-                    CardView cardView = cardViews[i]; //Comprobamos el CardView que toca según la i del for
+                    CardView cardView = cardViewsEnPista[i]; //Comprobamos el CardView que toca según la i del for
                     //Llamamos al método isViewOverlapping para comprobar si está superpuesto un objeto de otro
                     if (isViewOverlapping(view, cardView)) {
                         droppedOnCardView = true; //Al entrar en el bucle, cambiamos el booleano a true ya qué significa que un objeto está superpuseto a otro
@@ -796,19 +807,19 @@ public class MainActivity extends AppCompatActivity {
 
                 if (tag.equals("marcador")) {
                     //Actualiza el TextView de los puntos del equipo local en el marcador
-                    TextView puntosLocalTextView = cardViews[12].findViewById(R.id.textViewPuntosLocal);
+                    TextView puntosLocalTextView = marcador.findViewById(R.id.textViewPuntosLocal);
                     puntosLocalTextView.setText(String.valueOf(marcadorStats[0]));
 
                     //Actualiza el TextView de los puntos del equipo visitante en el marcador
-                    TextView puntosVisitanteTextView = cardViews[12].findViewById(R.id.textViewPuntosVisitante);
+                    TextView puntosVisitanteTextView = marcador.findViewById(R.id.textViewPuntosVisitante);
                     puntosVisitanteTextView.setText(String.valueOf(marcadorStats[1]));
 
                     //Actualiza el TextView de las faltas del equipo local en el marcador
-                    TextView faltasLocalTextView = cardViews[12].findViewById(R.id.textViewNumeroFaltasLocal);
+                    TextView faltasLocalTextView = marcador.findViewById(R.id.textViewNumeroFaltasLocal);
                     faltasLocalTextView.setText(String.valueOf(marcadorStats[2]));
 
                     //Actualiza el TextView de las faltas del equipo visitante en el marcador
-                    TextView faltasVisitanteTextView = cardViews[12].findViewById(R.id.textViewNumeroFaltasVisitante);
+                    TextView faltasVisitanteTextView = marcador.findViewById(R.id.textViewNumeroFaltasVisitante);
                     faltasVisitanteTextView.setText(String.valueOf(marcadorStats[3]));
                 } else {
                     //Actualiza el TextView de los puntos del CardView con los puntos nuevos sumados
@@ -828,19 +839,19 @@ public class MainActivity extends AppCompatActivity {
                     foulMadeTextView.setText(String.valueOf(playerStats[15]));
 
                     //Actualiza el TextView de los puntos del equipo local en el marcador
-                    TextView puntosLocalTextView = cardViews[12].findViewById(R.id.textViewPuntosLocal);
+                    TextView puntosLocalTextView = marcador.findViewById(R.id.textViewPuntosLocal);
                     puntosLocalTextView.setText(String.valueOf(marcadorStats[0]));
 
                     //Actualiza el TextView de los puntos del equipo visitante en el marcador
-                    TextView puntosVisitanteTextView = cardViews[12].findViewById(R.id.textViewPuntosVisitante);
+                    TextView puntosVisitanteTextView = marcador.findViewById(R.id.textViewPuntosVisitante);
                     puntosVisitanteTextView.setText(String.valueOf(marcadorStats[1]));
 
                     //Actualiza el TextView de las faltas del equipo local en el marcador
-                    TextView faltasLocalTextView = cardViews[12].findViewById(R.id.textViewNumeroFaltasLocal);
+                    TextView faltasLocalTextView = marcador.findViewById(R.id.textViewNumeroFaltasLocal);
                     faltasLocalTextView.setText(String.valueOf(marcadorStats[2]));
 
                     //Actualiza el TextView de las faltas del equipo visitante en el marcador
-                    TextView faltasVisitanteTextView = cardViews[12].findViewById(R.id.textViewNumeroFaltasVisitante);
+                    TextView faltasVisitanteTextView = marcador.findViewById(R.id.textViewNumeroFaltasVisitante);
                     faltasVisitanteTextView.setText(String.valueOf(marcadorStats[3]));
                 }
 
