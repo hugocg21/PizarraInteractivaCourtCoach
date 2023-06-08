@@ -38,8 +38,12 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
     Button button_banquillo;
     private ImageButton imageButton_Play, imageButton_Stop; //Botontes de Play y Stop del marcador
-    private TextView textView_tiempo, textView_puntosLocal, textView_puntosVisitante, textView_periodo, textView_faltasLocal, textView_faltasVisitante; //Atributos del marcador
-    private TextView textView_puntosJugadorCardView, textView_rebotesJugadorCardView, textView_asistenciasJugadorCardView, textView_faltasJugadorCardView; //Estadisticas en el CardView
+
+    //Atributos del marcador
+    private TextView textView_tiempo, textView_puntosLocal, textView_puntosVisitante, textView_periodo, textView_faltasLocal, textView_faltasVisitante;
+
+    //Estadisticas en el CardView
+    private TextView textView_puntosJugadorCardView, textView_rebotesJugadorCardView, textView_asistenciasJugadorCardView, textView_faltasJugadorCardView;
     private CountDownTimer timer; //Timer para el timepo de cuarto
     private boolean tiempoCorriendo = false; //Define si el tiempo esta en corriendo o parado
     private long tiempoCuarto = 600000; //10 minutos en milisegundos
@@ -48,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private CardView marcador;
     private HashMap<String, int[]> statsJugadoresMap = new HashMap<>(); //HashMap con las estadísticas de cada jugador
     private int[] marcadorStats;
-    private ConstraintLayout enPista;
+    private ConstraintLayout constraintLayout_pista;
+    private LinearLayout linearLayout_banquillo;
     private int numJugadoresConvocados = 12;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -57,7 +62,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        enPista = findViewById(R.id.constraintLayoutQuinteto);
+        constraintLayout_pista = findViewById(R.id.constraintLayoutQuinteto);
+        linearLayout_banquillo = findViewById(R.id.linearLayoutBanquillo);
 
         button_banquillo = findViewById(R.id.buttonBanquillo);
 
@@ -197,12 +203,55 @@ public class MainActivity extends AppCompatActivity {
             jugadores.addView(cardView);
         }
 
-        /*//Asignamos el movimiento de los CardViews con un bucle for
-        for (CardView cardView : cardViewsBanquillo) {
-            cardView.setOnClickListener(new View.OnClickListener() {
+        /*for (int i = 0; i < constraintLayout_pista.getChildCount(); i++) {
+            CardView jugador = (CardView) constraintLayout_pista.getChildAt(i);
+            jugador.setOnDragListener(new View.OnDragListener() {
+                @SuppressLint("UseCompatLoadingForDrawables")
                 @Override
-                public void onClick(View view) {
-                    mostrarDialogo((String) cardView.getTag());
+                public boolean onDrag(View v, DragEvent event) {
+                    int action = event.getAction();
+                    switch (action) {
+                        case DragEvent.ACTION_DRAG_STARTED:
+                        case DragEvent.ACTION_DRAG_EXITED:
+                            v.setBackgroundColor(Color.GREEN); // Cambiar el color del fondo de la pista para indicar una posible posición de soltar
+                            return true;
+                        case DragEvent.ACTION_DRAG_ENTERED:
+                            v.setBackgroundColor(Color.BLUE); // Cambiar el color del fondo de la pista cuando el jugador se arrastra sobre ella
+                            return true;
+                        // Restaurar el color del fondo de la pista cuando el jugador sale de ella
+                        case DragEvent.ACTION_DROP:
+                            // Obtener el CardView arrastrado
+                            CardView cardViewArrastrado = (CardView) event.getLocalState();
+
+                            // Obtener el tag del CardView arrastrado
+                            String tagArrastrado = (String) cardViewArrastrado.getTag();
+
+                            // Obtener el tag del CardView de destino (Pista)
+                            String tagDestino = (String) v.getTag();
+
+                            // Obtener los datos del jugador arrastrado
+                            int[] jugadorArrastradoStats = statsJugadoresMap.get(tagArrastrado);
+
+                            // Obtener los datos del jugador en pista
+                            int[] jugadorDestinoStats = statsJugadoresMap.get(tagDestino);
+
+                            // Intercambiar los datos de estadísticas
+                            statsJugadoresMap.put(tagArrastrado, jugadorDestinoStats);
+                            statsJugadoresMap.put(tagDestino, jugadorArrastradoStats);
+
+                            // Actualizar las estadísticas mostradas en los CardViews
+                            actualizarEstadisticasJugador(cardViewArrastrado, tagDestino);
+                            actualizarEstadisticasJugador((CardView) v, tagArrastrado);
+
+                            v.setBackgroundColor(Color.WHITE); // Restaurar el color del fondo de la pista después de soltar
+                            return true;
+                        case DragEvent.ACTION_DRAG_ENDED:
+                            v.setBackgroundColor(Color.WHITE); // Restaurar el color del fondo de la pista después de arrastrar
+                            return true;
+                        default:
+                            break;
+                    }
+                    return true;
                 }
             });
         }*/
@@ -214,32 +263,50 @@ public class MainActivity extends AppCompatActivity {
                     ClipData clipData = ClipData.newPlainText("", "");
                     View.DragShadowBuilder dragShadowBuilder = new View.DragShadowBuilder(view);
                     view.startDragAndDrop(clipData, dragShadowBuilder, view, 0);
-                    dialog.dismiss();
+                    dialog.hide();
 
                     cardView.setOnDragListener(new View.OnDragListener() {
                         @Override
                         public boolean onDrag(View v, DragEvent event) {
                             int action = event.getAction();
                             switch (action) {
+                                case DragEvent.ACTION_DRAG_STARTED:
+                                case DragEvent.ACTION_DRAG_EXITED:
+                                    v.setBackgroundColor(Color.GREEN); // Cambiar el color del fondo de la pista para indicar una posible posición de soltar
+                                    return true;
+                                case DragEvent.ACTION_DRAG_ENTERED:
+                                    v.setBackgroundColor(Color.BLUE); // Cambiar el color del fondo de la pista cuando el jugador se arrastra sobre ella
+                                    return true;
+                                // Restaurar el color del fondo de la pista cuando el jugador sale de ella
                                 case DragEvent.ACTION_DROP:
-                                    // Obtener la vista arrastrada
-                                    CardView draggedCardView = (CardView) event.getLocalState();
-                                    // Obtener el índice de la vista arrastrada en los jugadores del banquillo
-                                    int indexInBanquillo = Arrays.asList(cardViewsBanquillo).indexOf(draggedCardView);
-                                    // Obtener el índice de la vista sobre la cual se soltó
-                                    int indexInPista = Arrays.asList(cardViewsEnPista).indexOf(v);
-                                    // Comprobar si se soltó encima de otro CardView
-                                    if (indexInPista != -1) {
-                                        // Obtener el CardView en pista que será reemplazado
-                                        CardView cardViewEnPista = cardViewsEnPista[indexInPista];
-                                        // Realizar la sustitución en los arrays
-                                        cardViewsBanquillo[indexInBanquillo] = cardViewEnPista;
-                                        cardViewsEnPista[indexInPista] = draggedCardView;
-                                        // Actualizar la vista en la pantalla
-                                        enPista.removeView(cardViewEnPista);
-                                        enPista.addView(draggedCardView, indexInPista);
-                                    }
-                                    break;
+                                    // Obtener el CardView arrastrado
+                                    CardView cardViewArrastrado = (CardView) event.getLocalState();
+
+                                    // Obtener el tag del CardView arrastrado
+                                    String tagArrastrado = (String) cardViewArrastrado.getTag();
+
+                                    // Obtener el tag del CardView de destino (Pista)
+                                    String tagDestino = (String) v.getTag();
+
+                                    // Obtener los datos del jugador arrastrado
+                                    int[] jugadorArrastradoStats = statsJugadoresMap.get(tagArrastrado);
+
+                                    // Obtener los datos del jugador en pista
+                                    int[] jugadorDestinoStats = statsJugadoresMap.get(tagDestino);
+
+                                    // Intercambiar los datos de estadísticas
+                                    statsJugadoresMap.put(tagArrastrado, jugadorDestinoStats);
+                                    statsJugadoresMap.put(tagDestino, jugadorArrastradoStats);
+
+                                    // Actualizar las estadísticas mostradas en los CardViews
+                                    actualizarEstadisticasJugador(cardViewArrastrado, tagDestino);
+                                    actualizarEstadisticasJugador((CardView) v, tagArrastrado);
+
+                                    v.setBackgroundColor(Color.WHITE); // Restaurar el color del fondo de la pista después de soltar
+                                    return true;
+                                case DragEvent.ACTION_DRAG_ENDED:
+                                    v.setBackgroundColor(Color.WHITE); // Restaurar el color del fondo de la pista después de arrastrar
+                                    return true;
                                 default:
                                     break;
                             }
@@ -564,6 +631,30 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    private void mostrarEstadisticasJugador(CardView cardView, String tag) {
+        // Obtener las referencias a los elementos de texto en el CardView
+        TextView textViewNombreJugador = cardView.findViewById(R.id.textViewNombreJugador);
+        TextView textViewPuntosJugador = cardView.findViewById(R.id.textViewPuntosJugador);
+        TextView textViewAsistenciasJugador = cardView.findViewById(R.id.textViewAsistenciasJugador);
+        TextView textViewRebotesJugador = cardView.findViewById(R.id.textViewRebotesJugador);
+        TextView textViewFaltasJugador = cardView.findViewById(R.id.textViewFaltasJugador);
+
+        // Obtener los datos de las estadísticas del jugador desde el HashMap
+        int[] jugadorStats = statsJugadoresMap.get(tag);
+
+        // Establecer los valores de los TextView con los datos del jugador
+        textViewNombreJugador.setText(tag);
+        textViewPuntosJugador.setText(String.valueOf(jugadorStats[0]));
+        textViewAsistenciasJugador.setText(String.valueOf(jugadorStats[1]));
+        textViewRebotesJugador.setText(String.valueOf(jugadorStats[2]));
+        textViewFaltasJugador.setText(String.valueOf(jugadorStats[3]));
+    }
+
+    private void actualizarEstadisticasJugador(CardView cardView, String tag) {
+        // Mostrar las estadísticas actualizadas del jugador en el CardView
+        mostrarEstadisticasJugador(cardView, tag);
+    }
+
     //Clase que controla los eventos que se realizan al tocar los objetos de la pantalla
     private class MyOnTouchListener implements View.OnTouchListener {
         private int initialX, initialY; //Guardamos en estas variables la posición inicial de cada ImageView
@@ -878,28 +969,6 @@ public class MainActivity extends AppCompatActivity {
 
             //Devolvemos un booleano de si están superpuestos o no
             return rect1.intersect(rect2);
-        }
-
-        public void sustituirJugadores(CardView jugadorEntra, CardView jugadorSale) {
-            Rect rect1 = new Rect();
-            jugadorEntra.getGlobalVisibleRect(rect1);
-            Rect rect2 = new Rect();
-            jugadorSale.getGlobalVisibleRect(rect2);
-            if (Rect.intersects(rect1, rect2)) {
-                // Get the parent ViewGroup
-                ViewGroup parent = (ViewGroup) jugadorEntra.getParent();
-
-                // Remove both CardViews from the parent ViewGroup
-                parent.removeView(jugadorEntra);
-                parent.removeView(jugadorSale);
-
-                // Add the CardViews back to the parent ViewGroup in the reverse order
-                parent.addView(jugadorSale);
-                parent.addView(jugadorEntra);
-
-                // Request a layout update
-                parent.requestLayout();
-            }
         }
     }
 }
